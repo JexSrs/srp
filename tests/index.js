@@ -1,5 +1,11 @@
 const {Server, Client, Routines, Parameters, generateVerifierAndSalt} = require('../dist');
 
+
+setTimeout(() => {
+    console.log('Timeout was reached.');
+    process.exit(1);
+}, 40000); // 40 sec
+
 let db = [];
 
 // Registration
@@ -16,8 +22,6 @@ let db = [];
     /* storeToDatabase(username, salt, verifier) */
     db.push({username, salt, verifier});
 })();
-
-
 
 // Login
 (() => {
@@ -53,4 +57,6 @@ let db = [];
 
     // Client
     client.step3(M2); // Verify server (if exception, then failed)
+
+    process.exit(0);
 })();
