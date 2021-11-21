@@ -1,0 +1,29 @@
+{
+  "name": "@project-christopher/srp",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "dependencies": {
+
+  },
+  "scripts": {
+    "build": "rm -rf dist && tsc",
+    "test-start": "tsc && node ./tests/index.js",
+    "dev": "tsc-watch --onSuccess \\\"node --stack-trace-limit=100 tests/index.js\\\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Project-Christopher/srp-typescript.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Project-Christopher/srp-typescript/issues"
+  },
+  "license": "Apache 2.0",
+  "devDependencies": {
+    "@types/node": "^16.11.9",
+    "dotenv": "^10.0.0",
+    "tsc-watch": "^4.5.0",
+    "typescript": "^4.4.4"
+  }
+}

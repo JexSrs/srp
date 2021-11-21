@@ -1,0 +1,124 @@
+import {Routines} from "./modules/Routines";
+import {modPow} from "./modules/utils";
+import {Parameters} from "./modules/Parameters";
+import {ServerState} from "./components/ServerState";
+
+const computeServerPublicValue = (parameters: Parameters, k: bigint, v: bigint, b: bigint): bigint => {
+    return (
+        (modPow(parameters.primeGroup.g, b, parameters.primeGroup.N) + v * k) %
+        parameters.primeGroup.N
+    );
+};
+
+const computeServerSessionKey = (N: bigint, v: bigint, u: bigint, A: bigint, b: bigint): bigint => {
+    return modPow(modPow(v, u, N) * A, b, N);
+};
+
+export class Server {
+    constructor(private readonly routines: Routines) {}
+
+    declare I: string
+    declare salt: bigint
+    declare verifier: bigint
+    declare b: bigint
+    declare B: bigint
+
+    /**
+     * Stores identity, salt and verifier.
+     * Generates public and private keys B and b.
+     * @param identity User's identity.
+     * @param salt Salt stored in database.
+     * @param verifier Verifier stored in database.
+     * @return B Server's public key.
+     */
+    public step1(identity: string, salt: string, verifier: string): string {
+        if (!identity || !identity.trim()) throw new Error("identity must not be null nor empty.");
+        if (!salt || !salt.trim()) throw new Error("Salt must not be null nor empty.");
+        if (!verifier || !verifier.trim()) throw new Error("Verifier must not be null nor empty.");
+
+        let v =  BigInt("0x" + verifier)
+
+        const b = this.routines.generatePrivateValue();
+        const k = this.routines.computeK();
+        const B = computeServerPublicValue(this.routines.parameters, k, v, b);
+
+        this.I = identity;
+        this.salt = BigInt("0x" + salt);
+        this.verifier = v;
+        this.b = b;
+        this.B = B;
+
+        return this.B.toString(16);
+    }
+
+    /**
+     * Compute the session key "S" without computing or checking client evidence
+     * @param A Client public key "A"
+     */
+    sessionKey(A: bigint): bigint {
+        if (A === null) throw new Error("Client public value (A) must not be null.");
+
+        if (!this.routines.isValidPublicValue(A))
+            throw new Error(`Invalid Client public value (A): ${A.toString(16)}`);
+
+        const u = this.routines.computeU(A, this.B);
+
+        // S
+        return computeServerSessionKey(this.routines.parameters.primeGroup.N, this.verifier, u, A, this.b);
+    }
+
+    /**
+     * Computes M2 and checks if client is authenticated.
+     * @param A Client public key "A"
+     * @param M1 Client message "M1"
+     * @return M2 The server evidence message
+     */
+    step2(A: string, M1: string): string {
+        if (!A || !A.trim()) throw new Error("Client public key (A) must not be null nor empty.");
+        if (!M1 || !M1.trim()) throw new Error("Client evidence (M1) must not be null nor empty.");
+
+        let Abi =  BigInt("0x" + A);
+        let M1bi =  BigInt("0x" + M1);
+
+        const S = this.sessionKey(Abi);
+
+        const computedM1 = this.routines.computeClientEvidence(this.I, this.salt, Abi, this.B, S);
+        if (computedM1 !== M1bi) throw new Error("Bad client credentials.");
+
+        // M2
+        return this.routines.computeServerEvidence(Abi, M1bi, S).toString(16);
+    }
+
+    /**
+     * Exports identity, salt, verifier, b and B values.
+     * Should be called after step1.
+     */
+    toJSON(): ServerState {
+        return {
+            identity: this.I,
+            salt: this.salt.toString(16),
+            verifier: this.verifier.toString(16),
+            b: this.b.toString(16),
+            B: this.B.toString(16),
+        };
+    }
+
+    /**
+     * Generates Server session from existing values: identity, salt, verifier, b and B.
+     * @param routines The routines used when server session first generated.
+     * @param state The state object, usually can be accessed from toJSON().
+     */
+    static fromState(routines: Routines, state: ServerState) {
+        let srv = new Server(routines);
+
+        srv.I = state.identity;
+        srv.salt = BigInt("0x" + state.salt)
+        srv.verifier = BigInt("0x" + state.verifier)
+        srv.b = BigInt("0x" + state.b)
+        srv.B = BigInt("0x" + state.B)
+
+        return srv;
+    }
+}
+
+export {ServerState}
