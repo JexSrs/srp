@@ -1,0 +1,1 @@
+export type HashFunction = (data: ArrayBuffer) => ArrayBuffer;
