@@ -2,48 +2,13 @@ import {Parameters} from "./Parameters";
 import {Crypto} from "./crypto";
 import {Routines} from "./Routines";
 import {IVerifierAndSalt} from "../components/IVerifierAndSalt";
-
-export const ZERO: bigint = BigInt(0);
-export const ONE: bigint = BigInt(1);
-export const TWO: bigint = BigInt(2);
+import {
+    bigintToArrayBuffer,
+    arrayBufferToBigint,
+} from './transformations'
+import {ONE} from "./bigintMath";
 
 const cc = Crypto.compatibleCrypto()
-
-export function bigintToArrayBuffer(n: bigint): ArrayBuffer {
-    const hex = n.toString(16);
-    const arrayBuffer = new ArrayBuffer(Math.ceil(hex.length / 2));
-    const u8 = new Uint8Array(arrayBuffer);
-    let offset = 0;
-    // handle toString(16) not padding
-    if (hex.length % 2 !== 0) {
-        u8[0] = parseInt(hex[0], 16);
-        offset = 1;
-    }
-    for (let i = 0; i < arrayBuffer.byteLength; i++) {
-        u8[i + offset] = parseInt(
-            hex.slice(2 * i + offset, 2 * i + 2 + offset),
-            16,
-        );
-    }
-    return arrayBuffer;
-}
-
-export function arrayBufferToBigint(ab: ArrayBuffer): bigint {
-    const hex: string[] = [];
-    // we can't use map here because map will return Uint8Array which will screw up the parsing below
-    new Uint8Array(ab).forEach((i) => {
-        hex.push(("0" + i.toString(16)).slice(-2)); // i.toString(16) will transform 01 to 1, so we add it back on and slice takes the last two chars
-    });
-    return BigInt(`0x${hex.join("")}`);
-}
-
-/**
- * Convert string into ArrayBuffer.
- * @param s Any UTF8 string.
- */
-export function stringToArrayBuffer(s: string): ArrayBuffer {
-    return new TextEncoder().encode(s).buffer;
-}
 
 /**
  * Left pad ArrayBuffer with zeroes.
@@ -63,6 +28,11 @@ export function padStartArrayBuffer(ab: ArrayBuffer, targetLength: number): Arra
     return u8;
 }
 
+/**
+ * Generates a hash using an ArrayBuffer.
+ * @param parameters The parameters used for hashing.
+ * @param arrays The arrays that will be hashed.
+ */
 export function hash(parameters: Parameters, ...arrays: ArrayBuffer[]): ArrayBuffer {
     const length = arrays.reduce((p, c) => p + c.byteLength, 0);
     const target = new Uint8Array(length);
@@ -73,6 +43,12 @@ export function hash(parameters: Parameters, ...arrays: ArrayBuffer[]): ArrayBuf
     return parameters.hash(target);
 }
 
+/**
+ * Left pad in ArrayBuffer with zeroes and generates a hash from it.
+ * @param parameters The parameters used fro hashing.
+ * @param targetLen Length of the target array in bytes.
+ * @param arrays The arrays that the transformation will be applied.
+ */
 export function hashPadded(parameters: Parameters, targetLen: number, ...arrays: ArrayBuffer[]): ArrayBuffer {
     const arraysPadded = arrays.map((arrayBuffer) =>
         padStartArrayBuffer(arrayBuffer, targetLen),
@@ -80,6 +56,10 @@ export function hashPadded(parameters: Parameters, targetLen: number, ...arrays:
     return hash(parameters, ...arraysPadded);
 }
 
+/**
+ * Generates random ArrayBuffer.
+ * @param numBytes Length of the ArrayBuffer in bytes.
+ */
 function generateRandom(numBytes: number): ArrayBuffer {
     const u8 = new Uint8Array(numBytes);
     cc.randomBytes(u8);
@@ -89,9 +69,9 @@ function generateRandom(numBytes: number): ArrayBuffer {
 /**
  * Generates random string of ASCII characters using crypto secure random generator.
  * @param characterCount The length of the result string.
- * @return The string.
+ * @return string The random string.
  */
-export function generateRandomString(characterCount: number = 10) {
+export function generateRandomString(characterCount: number = 10): string {
     const u8 = new Uint8Array(Math.ceil(Math.ceil(characterCount / 2))); // each byte has 2 hex digits
     cc.randomBytes(u8);
     return u8.reduce((str, i) => {
@@ -103,11 +83,22 @@ export function generateRandomString(characterCount: number = 10) {
     }, "").slice(0, characterCount); // so we don't go over when characterCount is odd
 }
 
+/**
+ * Generates random big integer.
+ * @param numBytes Length of the bigInt in bytes.
+ */
 export function generateRandomBigInt(numBytes: number = 16): bigint {
     return arrayBufferToBigint(generateRandom(numBytes));
 }
 
-export function createVerifier(routines: Routines, I: string, s: bigint, P: string,): bigint {
+/**
+ * Generates a random verifier using the user's Identity, salt and Password.
+ * @param routines The routines used for hashing.
+ * @param I The user's identity.
+ * @param s The random salt.
+ * @param P The user's Password
+ */
+export function createVerifier(routines: Routines, I: string, s: bigint, P: string): bigint {
     if (!I || !I.trim()) throw new Error("Identity (I) must not be null or empty.")
     if (!s) throw new Error("Salt (s) must not be null.");
     if (!P) throw new Error("Password (P) must not be null");
@@ -117,40 +108,21 @@ export function createVerifier(routines: Routines, I: string, s: bigint, P: stri
     return routines.computeVerifier(x);
 }
 
-export function createVerifierAndSalt(routines: Routines, I: string, P: string, sBytes?: number,): IVerifierAndSalt {
+/**
+ * Generates salt and verifier.
+ * @param routines The routines used for hashing.
+ * @param I The user's identity.
+ * @param P The user's password.
+ * @param sBytes Length of salt in bytes.
+ */
+export function generateVerifierAndSalt(routines: Routines, I: string, P: string, sBytes?: number): IVerifierAndSalt {
     const s = routines.generateRandomSalt(sBytes);
 
-    return {salt: s, verifier: createVerifier(routines, I, s, P),};
+    return {salt: s.toString(16), verifier: createVerifier(routines, I, s, P).toString(16)};
 }
 
 export function hashBitCount(parameters: Parameters): number {
     return hash(parameters, bigintToArrayBuffer(ONE)).byteLength * 8;
-}
-
-/**
- * Calculates (x**pow) % mod
- * @param x base, non negative big int.
- * @param pow power, non negative power.
- * @param mod modulo, positive modulo for division.
- */
-export function modPow(x: bigint, pow: bigint, mod: bigint): bigint {
-    if (x < ZERO) throw new Error("Invalid base: " + x.toString());
-    if (pow < ZERO) throw new Error("Invalid power: " + pow.toString());
-    if (mod < ONE) throw new Error("Invalid modulo: " + mod.toString());
-
-    let result: bigint = ONE;
-    while (pow > ZERO) {
-        if (pow % TWO == ONE) {
-            result = (x * result) % mod;
-            pow -= ONE;
-        }
-        else {
-            x = (x * x) % mod;
-            pow /= TWO;
-        }
-    }
-
-    return result;
 }
 
 

@@ -42,6 +42,7 @@ export class Parameters {
             g: BigInt(2),
         },
     };
+
     static Hash = {
         SHA1: cc.hashFunctions.SHA1,
         SHA256: cc.hashFunctions.SHA256,

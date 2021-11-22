@@ -15,7 +15,7 @@ let db = [];
     const password = "password";
 
     let routines = new Routines(new Parameters());
-    const {salt, verifier} = generateVerifierAndSalt(routines, username, password);
+    let {salt, verifier} = generateVerifierAndSalt(routines, username, password);
     /* sendToServer(username, salt, verifier) */
 
     // Server
@@ -48,7 +48,7 @@ let db = [];
     /* sendToClient(B, salt) */
 
     // Client
-    const {A, M1} = client.step2(salt, B); // Generate client's public key A and client (M1) evidence.
+    let {A, M1} = client.step2(salt, B); // Generate client's public key A and client (M1) evidence.
     /* sendToServer(A, M1) */
 
     // Server

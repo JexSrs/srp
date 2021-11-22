@@ -1,4 +1,4 @@
-export interface AandM1 {
+export interface M1andA {
     A: string;
     M1: string;
 }

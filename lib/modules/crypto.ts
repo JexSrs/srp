@@ -2,6 +2,9 @@ import {CompatibleCrypto} from "../components/CompatibleCrypto";
 
 export class Crypto {
 
+    /**
+     * Returns the compatible crypto for this system.
+     */
     static compatibleCrypto(): CompatibleCrypto {
         const nodeCrypto = require("crypto");
         const nodeCreateHashToHashFunction = (algorithm: AlgorithmIdentifier) => (data: ArrayBuffer) =>

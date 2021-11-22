@@ -1,4 +1,4 @@
 export interface IVerifierAndSalt {
-    verifier: bigint;
-    salt: bigint;
+    verifier: string;
+    salt: string;
 }
