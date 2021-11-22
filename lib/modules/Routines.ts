@@ -154,16 +154,17 @@ export class Routines {
 
     /**
      * Computes M1 which is the client's evidence.
-     * @param _I The user's identity.
-     * @param _s The random salt
+     * @param I The user's identity.
+     * @param s The random salt
      * @param A The client's public value.
      * @param B The server's public value.
      * @param S The session key.
      */
-    computeClientEvidence(_I: string, _s: bigint, A: bigint, B: bigint, S: bigint): bigint {
-        // TODO - IDENTITY.
+    computeClientEvidence(I: string, s: bigint, A: bigint, B: bigint, S: bigint): bigint {
         return arrayBufferToBigint(
             this.hash(
+                stringToArrayBuffer(I),
+                bigintToArrayBuffer(s),
                 bigintToArrayBuffer(A),
                 bigintToArrayBuffer(B),
                 bigintToArrayBuffer(S)
