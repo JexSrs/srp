@@ -1,16 +1,16 @@
 import {Routines} from "./modules/Routines";
 import {ClientState} from "./components/ClientState";
-import {AandM1} from "./components/AandM1";
+import {M1andA} from "./components/M1andA";
 
 export class Client {
     constructor(private readonly routines: Routines) {}
 
-    declare I: string
-    declare IH: ArrayBuffer
-    declare A: bigint
-    declare a: bigint
-    declare M1: bigint
-    declare S: bigint
+    private declare I: string
+    private declare IH: ArrayBuffer
+    private declare A: bigint
+    private declare a: bigint
+    private declare M1: bigint
+    private declare S: bigint
 
     /**
      * Stores the user's identity and generates IH (Identity Hash) using the user's password.
@@ -33,7 +33,7 @@ export class Client {
      * @param salt Salt received from server.
      * @param B Server public key "B".
      */
-    step2(salt: string, B: string): AandM1 {
+    step2(salt: string, B: string): M1andA {
         if (!salt || !salt.trim()) throw new Error("Salt (s) must not be null nor empty.");
         if (!B || !B.trim()) throw new Error("Public server value (B) must not be null nor empty.");
 
@@ -53,10 +53,7 @@ export class Client {
         this.M1 = M1;
         this.S = S;
 
-        return {
-            A: this.A.toString(16),
-            M1: this.M1.toString(16)
-        }
+        return {M1: this.M1.toString(16), A: this.A.toString(16)};
     }
 
     /**

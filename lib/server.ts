@@ -1,27 +1,14 @@
 import {Routines} from "./modules/Routines";
-import {modPow} from "./modules/utils";
-import {Parameters} from "./modules/Parameters";
 import {ServerState} from "./components/ServerState";
-
-const computeServerPublicValue = (parameters: Parameters, k: bigint, v: bigint, b: bigint): bigint => {
-    return (
-        (modPow(parameters.primeGroup.g, b, parameters.primeGroup.N) + v * k) %
-        parameters.primeGroup.N
-    );
-};
-
-const computeServerSessionKey = (N: bigint, v: bigint, u: bigint, A: bigint, b: bigint): bigint => {
-    return modPow(modPow(v, u, N) * A, b, N);
-};
 
 export class Server {
     constructor(private readonly routines: Routines) {}
 
-    declare I: string
-    declare salt: bigint
-    declare verifier: bigint
-    declare b: bigint
-    declare B: bigint
+    private declare I: string
+    private declare salt: bigint
+    private declare verifier: bigint
+    private declare b: bigint
+    private declare B: bigint
 
     /**
      * Stores identity, salt and verifier.
@@ -40,7 +27,7 @@ export class Server {
 
         const b = this.routines.generatePrivateValue();
         const k = this.routines.computeK();
-        const B = computeServerPublicValue(this.routines.parameters, k, v, b);
+        const B = this.routines.computeServerPublicValue(this.routines.parameters, k, v, b);
 
         this.I = identity;
         this.salt = BigInt("0x" + salt);
@@ -64,7 +51,7 @@ export class Server {
         const u = this.routines.computeU(A, this.B);
 
         // S
-        return computeServerSessionKey(this.routines.parameters.primeGroup.N, this.verifier, u, A, this.b);
+        return this.routines.computeServerSessionKey(this.routines.parameters.primeGroup.N, this.verifier, u, A, this.b);
     }
 
     /**
@@ -120,5 +107,3 @@ export class Server {
         return srv;
     }
 }
-
-export {ServerState}
