@@ -88,8 +88,7 @@ export class Routines {
      * @param P The user's password.
      */
     computeIdentityHash(I: string, P: string): ArrayBuffer {
-        // TODO - IDENTITY.
-        return this.hash(stringToArrayBuffer(P));
+        return this.hash(stringToArrayBuffer(`${I}:${P}`));
     }
 
     /**
@@ -163,7 +162,13 @@ export class Routines {
      */
     computeClientEvidence(_I: string, _s: bigint, A: bigint, B: bigint, S: bigint): bigint {
         // TODO - IDENTITY.
-        return arrayBufferToBigint(this.hash(bigintToArrayBuffer(A), bigintToArrayBuffer(B), bigintToArrayBuffer(S)));
+        return arrayBufferToBigint(
+            this.hash(
+                bigintToArrayBuffer(A),
+                bigintToArrayBuffer(B),
+                bigintToArrayBuffer(S)
+            )
+        );
     }
 
     /**
