@@ -1,6 +1,6 @@
 import {Routines} from "./modules/Routines";
 import {ClientState} from "./components/ClientState";
-import {M1andA} from "./components/M1andA";
+import {M1AndA} from "./components/M1AndA";
 
 export class Client {
     constructor(private readonly routines: Routines) {}
@@ -18,8 +18,8 @@ export class Client {
      * @param password User password (not kept in state).
      */
     step1(identity: string, password: string): void {
-        if (!identity || !identity.trim()) throw new Error("User identity must not be null nor empty.");
-        if (!password) throw new Error("User password must not be null");
+        if (!identity || !identity.trim()) throw new Error("User's identity (I) must not be null nor empty.");
+        if (!password) throw new Error("User's password (P) must not be null");
 
         const IH = this.routines.computeIdentityHash(identity, password);
 
@@ -33,9 +33,9 @@ export class Client {
      * @param salt Salt received from server.
      * @param B Server public key "B".
      */
-    step2(salt: string, B: string): M1andA {
+    step2(salt: string, B: string): M1AndA {
         if (!salt || !salt.trim()) throw new Error("Salt (s) must not be null nor empty.");
-        if (!B || !B.trim()) throw new Error("Public server value (B) must not be null nor empty.");
+        if (!B || !B.trim()) throw new Error("Server's public value (B) must not be null nor empty.");
 
         let s = BigInt("0x" + salt);
         let Bbi = BigInt("0x" + B);
@@ -63,10 +63,10 @@ export class Client {
     step3(M2: string): void {
         if (!M2 || !M2.trim()) throw new Error("Server evidence (M2) must not be null nor empty.");
 
-        let M2bi =  BigInt("0x" + M2);
+        let M2bi = BigInt("0x" + M2);
 
         const computedM2 = this.routines.computeServerEvidence(this.A, this.M1, this.S);
-        if (computedM2 !== M2bi) throw new Error("Bad server credentials");
+        if (computedM2 !== M2bi) throw new Error("Bad server credentials.");
     }
 
     /**

@@ -19,7 +19,7 @@ export class Server {
      * @return B Server's public key.
      */
     public step1(identity: string, salt: string, verifier: string): string {
-        if (!identity || !identity.trim()) throw new Error("identity must not be null nor empty.");
+        if (!identity || !identity.trim()) throw new Error("Identity must not be null nor empty.");
         if (!salt || !salt.trim()) throw new Error("Salt must not be null nor empty.");
         if (!verifier || !verifier.trim()) throw new Error("Verifier must not be null nor empty.");
 
@@ -27,7 +27,7 @@ export class Server {
 
         const b = this.routines.generatePrivateValue();
         const k = this.routines.computeK();
-        const B = this.routines.computeServerPublicValue(this.routines.parameters, k, v, b);
+        const B = this.routines.computeServerPublicValue(k, v, b);
 
         this.I = identity;
         this.salt = BigInt("0x" + salt);
@@ -39,7 +39,7 @@ export class Server {
     }
 
     /**
-     * Compute the session key "S" without computing or checking client evidence
+     * Compute the server session key "S"
      * @param A Client public key "A"
      */
     sessionKey(A: bigint): bigint {
@@ -51,7 +51,7 @@ export class Server {
         const u = this.routines.computeU(A, this.B);
 
         // S
-        return this.routines.computeServerSessionKey(this.routines.parameters.primeGroup.N, this.verifier, u, A, this.b);
+        return this.routines.computeServerSessionKey(this.verifier, u, A, this.b);
     }
 
     /**
@@ -64,8 +64,8 @@ export class Server {
         if (!A || !A.trim()) throw new Error("Client public key (A) must not be null nor empty.");
         if (!M1 || !M1.trim()) throw new Error("Client evidence (M1) must not be null nor empty.");
 
-        let Abi =  BigInt("0x" + A);
-        let M1bi =  BigInt("0x" + M1);
+        let Abi = BigInt("0x" + A);
+        let M1bi = BigInt("0x" + M1);
 
         const S = this.sessionKey(Abi);
 
@@ -98,11 +98,12 @@ export class Server {
     static fromState(routines: Routines, state: ServerState) {
         let srv = new Server(routines);
 
+        // filled after step1
         srv.I = state.identity;
-        srv.salt = BigInt("0x" + state.salt)
-        srv.verifier = BigInt("0x" + state.verifier)
-        srv.b = BigInt("0x" + state.b)
-        srv.B = BigInt("0x" + state.B)
+        srv.salt = BigInt("0x" + state.salt);
+        srv.verifier = BigInt("0x" + state.verifier);
+        srv.b = BigInt("0x" + state.b);
+        srv.B = BigInt("0x" + state.B);
 
         return srv;
     }

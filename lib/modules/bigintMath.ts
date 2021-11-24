@@ -5,7 +5,7 @@ export const TWO: bigint = BigInt(2);
 /**
  * Calculates (x**pow) % mod
  * @param x base, non negative big int.
- * @param pow power, non negative power.
+ * @param pow power, non-negative power.
  * @param mod modulo, positive modulo for division.
  */
 export function modPow(x: bigint, pow: bigint, mod: bigint): bigint {

@@ -38,7 +38,12 @@ export class Routines {
      * Computes K.
      */
     computeK(): bigint {
-        return arrayBufferToBigint(this.hashPadded(bigintToArrayBuffer(this.parameters.primeGroup.N), bigintToArrayBuffer(this.parameters.primeGroup.g)));
+        return arrayBufferToBigint(
+            this.hashPadded(
+                bigintToArrayBuffer(this.parameters.primeGroup.N),
+                bigintToArrayBuffer(this.parameters.primeGroup.g)
+            )
+        );
     }
 
     /**
@@ -108,7 +113,8 @@ export class Routines {
 
         do {
             bi = generateRandomBigInt(numBits / 8) % this.parameters.primeGroup.N;
-        } while (bi === ZERO);
+        }
+        while (bi === ZERO);
 
         return bi;
     }
@@ -123,15 +129,14 @@ export class Routines {
 
     /**
      * Generates the public value for the client.
-     * @param parameters The parameters that will be used for hashing.
      * @param k The k.
      * @param v The verifier.
      * @param b The server's private value.
      */
-    computeServerPublicValue(parameters: Parameters, k: bigint, v: bigint, b: bigint): bigint {
+    computeServerPublicValue(k: bigint, v: bigint, b: bigint): bigint {
         return (
-            (modPow(parameters.primeGroup.g, b, parameters.primeGroup.N) + v * k) %
-            parameters.primeGroup.N
+            (modPow(this.parameters.primeGroup.g, b, this.parameters.primeGroup.N) + v * k) %
+            this.parameters.primeGroup.N
         );
     }
 
@@ -149,7 +154,12 @@ export class Routines {
      * @param B The public value of server/\.
      */
     computeU(A: bigint, B: bigint): bigint {
-        return arrayBufferToBigint(this.hashPadded(bigintToArrayBuffer(A), bigintToArrayBuffer(B)));
+        return arrayBufferToBigint(
+            this.hashPadded(
+                bigintToArrayBuffer(A),
+                bigintToArrayBuffer(B)
+            )
+        );
     }
 
     /**
@@ -179,7 +189,12 @@ export class Routines {
      * @param S The session key.
      */
     computeServerEvidence(A: bigint, M1: bigint, S: bigint): bigint {
-        return arrayBufferToBigint(this.hash(bigintToArrayBuffer(A), bigintToArrayBuffer(M1), bigintToArrayBuffer(S),));
+        return arrayBufferToBigint(
+            this.hash(bigintToArrayBuffer(A),
+                bigintToArrayBuffer(M1),
+                bigintToArrayBuffer(S)
+            )
+        );
     }
 
     /**
@@ -206,7 +221,8 @@ export class Routines {
      * @param A The client's public value.
      * @param b The server's private value.
      */
-    computeServerSessionKey(N: bigint, v: bigint, u: bigint, A: bigint, b: bigint): bigint {
+    computeServerSessionKey(v: bigint, u: bigint, A: bigint, b: bigint): bigint {
+        const N = this.parameters.primeGroup.N
         return modPow(modPow(v, u, N) * A, b, N);
     }
 }

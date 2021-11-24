@@ -11,9 +11,10 @@ export class Parameters {
         public readonly primeGroup: PrimeGroup = Parameters.PrimeGroup[2048],
         public readonly hash: HashFunction = Parameters.Hash.SHA512,
     ) {
-        this.NBits = this.primeGroup.N.toString(2).length;
+        if (!primeGroup) throw new Error("PrimeGroup is required.");
+        if (!hash) throw new Error("Hash function is required.");
 
-        if (!hash) throw new Error("Hash function required");
+        this.NBits = this.primeGroup.N.toString(2).length;
     }
 
     static PrimeGroup = {
