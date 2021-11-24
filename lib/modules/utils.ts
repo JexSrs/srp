@@ -35,11 +35,13 @@ export function padStartArrayBuffer(ab: ArrayBuffer, targetLength: number): Arra
  */
 export function hash(parameters: Parameters, ...arrays: ArrayBuffer[]): ArrayBuffer {
     const length = arrays.reduce((p, c) => p + c.byteLength, 0);
+
     const target = new Uint8Array(length);
     for (let offset = 0, i = 0; i < arrays.length; i++) {
         target.set(new Uint8Array(arrays[i]), offset);
         offset += arrays[i].byteLength;
     }
+
     return parameters.hash(target);
 }
 
@@ -53,6 +55,7 @@ export function hashPadded(parameters: Parameters, targetLen: number, ...arrays:
     const arraysPadded = arrays.map((arrayBuffer) =>
         padStartArrayBuffer(arrayBuffer, targetLen),
     );
+
     return hash(parameters, ...arraysPadded);
 }
 
@@ -71,16 +74,16 @@ function generateRandom(numBytes: number): ArrayBuffer {
  * @param characterCount The length of the result string.
  * @return string The random string.
  */
-export function generateRandomString(characterCount: number = 10): string {
-    const u8 = new Uint8Array(Math.ceil(Math.ceil(characterCount / 2))); // each byte has 2 hex digits
+export function generateRandomString(characterCount: number): string {
+    const u8 = new Uint8Array(Math.ceil(characterCount / 2)); // each byte has 2 hex digits
     cc.randomBytes(u8);
     return u8.reduce((str, i) => {
         const hex = i.toString(16).toString();
-        if (hex.length === 1) {
+        if (hex.length === 1)
             return str + "0" + hex;
-        }
+
         return str + hex;
-    }, "").slice(0, characterCount); // so we don't go over when characterCount is odd
+    }, "").slice(0, characterCount);
 }
 
 /**
@@ -101,10 +104,9 @@ export function generateRandomBigInt(numBytes: number = 16): bigint {
 export function createVerifier(routines: Routines, I: string, s: bigint, P: string): bigint {
     if (!I || !I.trim()) throw new Error("Identity (I) must not be null or empty.")
     if (!s) throw new Error("Salt (s) must not be null.");
-    if (!P) throw new Error("Password (P) must not be null");
+    if (!P || !P.trim()) throw new Error("Password (P) must not be null  or empty.");
 
     const x = routines.computeX(I, s, P);
-
     return routines.computeVerifier(x);
 }
 

@@ -4,7 +4,7 @@ const {Server, Client, Routines, Parameters, generateVerifierAndSalt} = require(
 setTimeout(() => {
     console.log('Timeout was reached.');
     process.exit(1);
-}, 40000); // 40 sec
+}, 20000); // 40 sec
 
 let db = [];
 
@@ -39,13 +39,13 @@ let db = [];
     let document = db.find(doc => doc.username === username);
     if(!document) {
         // Send random data to avoid if user exists
-        /* sendToClient(randomB, randomSalt) */
+        /* respondToClient(randomB, randomSalt) */
         return;
     }
 
     let salt = document.salt
     const B = server.step1(username, salt, document.verifier); // Generate server's public key
-    /* sendToClient(B, salt) */
+    /* respondToClient(B, salt) */
 
     // Client
     let {A, M1} = client.step2(salt, B); // Generate client's public key A and client (M1) evidence.
@@ -53,7 +53,7 @@ let db = [];
 
     // Server
     let M2 = server.step2(A, M1); // Verify client (if exception, then failed)
-    /* sendToClient(M2) */
+    /* respondToClient(M2) */
 
     // Client
     client.step3(M2); // Verify server (if exception, then failed)
