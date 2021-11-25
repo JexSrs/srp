@@ -1,6 +1,6 @@
 import {Parameters} from "./Parameters";
 import {
-    generateRandomBigInt,
+    generateRandomBigint,
     hash,
     hashBitCount,
     hashPadded
@@ -55,7 +55,7 @@ export class Routines {
         // Recommended salt bytes is > than Hash output bytes. We default to twice
         // the bytes used by the hash
         const saltBytes = numBytes || (2 * HBits) / 8;
-        return generateRandomBigInt(saltBytes);
+        return generateRandomBigint(saltBytes);
     }
 
     /**
@@ -112,7 +112,7 @@ export class Routines {
         let bi: bigint;
 
         do {
-            bi = generateRandomBigInt(numBits / 8) % this.parameters.primeGroup.N;
+            bi = generateRandomBigint(numBits / 8) % this.parameters.primeGroup.N;
         }
         while (bi === ZERO);
 

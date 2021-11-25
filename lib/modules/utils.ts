@@ -90,7 +90,7 @@ export function generateRandomString(characterCount: number): string {
  * Generates random big integer.
  * @param numBytes Length of the bigInt in bytes.
  */
-export function generateRandomBigInt(numBytes: number = 16): bigint {
+export function generateRandomBigint(numBytes: number = 16): bigint {
     return arrayBufferToBigint(generateRandom(numBytes));
 }
 
