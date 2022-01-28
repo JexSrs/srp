@@ -52,8 +52,6 @@ export class Routines {
      */
     generateRandomSalt(numBytes?: number): bigint {
         const HBits = hashBitCount(this.parameters);
-        // Recommended salt bytes is > than Hash output bytes. We default to twice
-        // the bytes used by the hash
         const saltBytes = numBytes || (2 * HBits) / 8;
         return generateRandomBigint(saltBytes);
     }
@@ -215,7 +213,6 @@ export class Routines {
 
     /**
      * Computes the session key S for the server.
-     * @param N The prime N
      * @param v The verifier.
      * @param u The U.
      * @param A The client's public value.
