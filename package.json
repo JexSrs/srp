@@ -17,8 +17,12 @@
     "url": "https://github.com/Project-Christopher/srp/issues"
   },
   "license": "Apache 2.0",
+  "dependencies": {
+    "crypto-js": "^4.1.1"
+  },
   "devDependencies": {
     "@types/node": "^16.11.9",
+    "@types/crypto-js": "^4.1.0",
     "body-parser": "1.19.0",
     "chai": "^4.3.6",
     "dotenv": "^10.0.0",

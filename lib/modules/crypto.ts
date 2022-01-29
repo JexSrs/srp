@@ -3,22 +3,25 @@ import {CompatibleCrypto} from "../components/CompatibleCrypto";
 
 export class Crypto {
 
-    /**
-     * Returns the compatible crypto for this system.
-     */
-    static compatibleCrypto(): CompatibleCrypto {
-        const nodeCrypto = require("crypto");
-        const nodeCreateHashToHashFunction = (algorithm: AlgorithmIdentifier) => (data: ArrayBuffer) =>
-            nodeCrypto.createHash(algorithm).update(data).digest().buffer;
+    private static mCrypto?: CompatibleCrypto = undefined;
 
-        return {
-            randomBytes: nodeCrypto.randomFillSync,
-            hashFunctions: {
-                SHA1: nodeCreateHashToHashFunction("sha1"),
-                SHA256: nodeCreateHashToHashFunction("sha256"),
-                SHA384: nodeCreateHashToHashFunction("sha384"),
-                SHA512: nodeCreateHashToHashFunction("sha512"),
-            }
-        };
+    static compatibleCrypto(): CompatibleCrypto {
+        if(!this.mCrypto) {
+            const nodeCrypto = require("crypto");
+            const nodeCreateHashToHashFunction = (algorithm: AlgorithmIdentifier) =>
+                (data: Uint8Array) => nodeCrypto.createHash(algorithm).update(data).digest().buffer;
+
+            this.mCrypto = {
+                randomBytes: (length: number) => nodeCrypto.randomFillSync(new Uint8Array(length)),
+                hashFunctions: {
+                    SHA1: (data: Uint8Array) => nodeCreateHashToHashFunction("sha1")(data),
+                    SHA256: (data: Uint8Array) => nodeCreateHashToHashFunction("sha256")(data),
+                    SHA384: (data: Uint8Array) => nodeCreateHashToHashFunction("sha384")(data),
+                    SHA512: (data: Uint8Array) => nodeCreateHashToHashFunction("sha512")(data),
+                }
+            };
+        }
+
+        return this.mCrypto;
     }
 }

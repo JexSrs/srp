@@ -6,7 +6,7 @@ export class Client {
     constructor(private readonly routines: Routines) {}
 
     private declare I: string
-    private declare IH: ArrayBuffer
+    private declare IH: Uint8Array
     private declare A: bigint
     private declare a: bigint
     private declare M1: bigint
@@ -14,8 +14,8 @@ export class Client {
 
     /**
      * Stores the user's identity and generates IH (Identity Hash) using the user's password.
-     * @param identity User identity.
-     * @param password User password (not kept in state).
+     * @param identity
+     * @param password
      */
     step1(identity: string, password: string): void {
         if (!identity || !identity.trim()) throw new Error("User's identity (I) must not be null nor empty.");
@@ -79,7 +79,7 @@ export class Client {
         return {
             // filled after step1
             identity: I ? I : "",
-            IH: IH ? Array.from(new Uint8Array(IH)) : [],
+            IH: IH ? Array.from(IH) : [],
 
             // filled after step 2
             A: A ? A.toString(16) : "",
@@ -101,7 +101,7 @@ export class Client {
         if(state.identity)
             cl.I = state.identity;
         if(state.IH)
-            cl.IH = new Uint8Array(state.IH).buffer;
+            cl.IH = new Uint8Array(state.IH);
 
         // filled after step 2
         if(state.A)
