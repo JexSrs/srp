@@ -1,1 +1,1 @@
-export type HashFunction = (data: ArrayBuffer) => ArrayBuffer;
+export type HashFunction = (data: Uint8Array) => Uint8Array;
