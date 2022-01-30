@@ -40,3 +40,18 @@ export function bytesToBigint(array: Uint8Array): bigint {
 export function stringToByteArray(str: string): Uint8Array {
     return new TextEncoder().encode(str);
 }
+
+export function wordArrayToBytes(wordArray: any): Uint8Array {
+    let length = wordArray.words.length;
+
+    let u8_array = new Uint8Array(length << 2);
+    for (let offset= 0, i = 0; i < length; i++) {
+        let word = wordArray.words[i];
+        u8_array[offset++] = word >> 24;
+        u8_array[offset++] = (word >> 16) & 0xff;
+        u8_array[offset++] = (word >> 8) & 0xff;
+        u8_array[offset++] = word & 0xff;
+    }
+
+    return u8_array;
+}

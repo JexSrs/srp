@@ -1,26 +1,34 @@
+import * as CryptoJS from "crypto-js";
 import {CompatibleCrypto} from "../components/CompatibleCrypto";
-
+import {wordArrayToBytes} from "./transformations";
 
 export class Crypto {
 
     private static mCrypto?: CompatibleCrypto = undefined;
 
     static compatibleCrypto(): CompatibleCrypto {
-        if(!this.mCrypto) {
-            const nodeCrypto = require("crypto");
-            const nodeCreateHashToHashFunction = (algorithm: AlgorithmIdentifier) =>
-                (data: Uint8Array) => nodeCrypto.createHash(algorithm).update(data).digest().buffer;
-
+        if(!this.mCrypto)
             this.mCrypto = {
-                randomBytes: (length: number) => nodeCrypto.randomFillSync(new Uint8Array(length)),
+                randomBytes: (length: number) => new Uint8Array(CryptoJS.lib.WordArray.random(length).words),
                 hashFunctions: {
-                    SHA1: (data: Uint8Array) => nodeCreateHashToHashFunction("sha1")(data),
-                    SHA256: (data: Uint8Array) => nodeCreateHashToHashFunction("sha256")(data),
-                    SHA384: (data: Uint8Array) => nodeCreateHashToHashFunction("sha384")(data),
-                    SHA512: (data: Uint8Array) => nodeCreateHashToHashFunction("sha512")(data),
+                    SHA1: (data: Uint8Array) => {
+                        let result: any = CryptoJS.SHA1(CryptoJS.lib.WordArray.create(data as any));
+                        return wordArrayToBytes(result as any);
+                    },
+                    SHA256: (data: Uint8Array) => {
+                        let result: any = CryptoJS.SHA256(CryptoJS.lib.WordArray.create(data as any));
+                        return wordArrayToBytes(result as any);
+                    },
+                    SHA384: (data: Uint8Array) => {
+                        let result: any = CryptoJS.SHA384(CryptoJS.lib.WordArray.create(data as any));
+                        return wordArrayToBytes(result as any);
+                    },
+                    SHA512: (data: Uint8Array) => {
+                        let result: any = CryptoJS.SHA512(CryptoJS.lib.WordArray.create(data as any));
+                        return wordArrayToBytes(result as any);
+                    },
                 }
             };
-        }
 
         return this.mCrypto;
     }
