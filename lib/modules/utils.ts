@@ -1,7 +1,7 @@
-import {Parameters} from "./Parameters";
+import {Parameters} from "./parameters";
 import {Crypto} from "./crypto";
-import {Routines} from "./Routines";
-import {IVerifierAndSalt} from "../components/IVerifierAndSalt";
+import {Routines} from "./routines";
+import {IVerifierAndSalt} from "../components/types";
 import {bytesToBigint, bigintToBytes,} from './transformations'
 import {ONE} from "./bigintMath";
 

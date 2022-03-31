@@ -1,6 +1,5 @@
-import {Routines} from "./modules/Routines";
-import {ClientState} from "./components/ClientState";
-import {M1AndA} from "./components/M1AndA";
+import {Routines} from "./modules/routines";
+import {ClientState, M1AndA} from "./components/types";
 
 export class Client {
     constructor(private readonly routines: Routines) {}
@@ -13,13 +12,14 @@ export class Client {
     private declare S: bigint
 
     /**
-     * Stores the user's identity and generates IH (Identity Hash) using the user's password.
+     * Stores the user's identity and generates an identity hash ("IH") using the user's password.
+     * The password will not be stored.
      * @param identity
      * @param password
      */
     step1(identity: string, password: string): void {
         if (!identity || !identity.trim()) throw new Error("User's identity (I) must not be null nor empty.");
-        if (!password) throw new Error("User's password (P) must not be null");
+        if (!password) throw new Error("User's password (P) must not be null.");
 
         const IH = this.routines.computeIdentityHash(identity, password);
 
@@ -28,10 +28,10 @@ export class Client {
     }
 
     /**
-     * Generates public and private values A and a.
-     * Generates Client evidence message M1 and session key S.
+     * Generates public key "A" and private key "a".
+     * Generates client's evidence message "M1" and session key "S".
      * @param salt Salt received from server.
-     * @param B Server public key "B".
+     * @param B Server's public key "B".
      */
     step2(salt: string, B: string): M1AndA {
         if (!salt || !salt.trim()) throw new Error("Salt (s) must not be null nor empty.");
@@ -58,10 +58,10 @@ export class Client {
 
     /**
      * Checks if client and server is authenticated.
-     * @param M2 Server message "M2".
+     * @param M2 Server's evidence message "M2".
      */
     step3(M2: string): void {
-        if (!M2 || !M2.trim()) throw new Error("Server evidence (M2) must not be null nor empty.");
+        if (!M2 || !M2.trim()) throw new Error("Server's evidence message (M2) must not be null nor empty.");
 
         let M2bi = BigInt("0x" + M2);
 
@@ -70,7 +70,7 @@ export class Client {
     }
 
     /**
-     * Exports identity, IH, A, a, M1 and S values.
+     * Exports values "identity", "IH", "S", the keys "A", "a" and the client's evidence message "M1".
      * Should be called after step1 or step2.
      */
     toJSON(): ClientState {

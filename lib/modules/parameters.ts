@@ -1,6 +1,6 @@
-import { PrimeGroup } from "../components/PrimeGroup";
+import { PrimeGroup } from "../components/cryptoTypes";
 import {Crypto} from "./crypto";
-import {HashFunction} from "../components/HashFunction";
+import {HashFunction} from "../components/cryptoTypes";
 
 let cc = Crypto.compatibleCrypto()
 

@@ -1,7 +1,6 @@
-export {Server} from "./Server";
-export {ServerState} from "./components/ServerState"
-export {Client} from "./Client";
-export {ClientState} from "./components/ClientState"
-export {Routines} from "./modules/Routines";
-export {Parameters} from "./modules/Parameters";
+export {Server} from "./server";
+export {Client} from "./client";
+export {ClientState, ServerState} from "./components/types"
+export {Routines} from "./modules/routines";
+export {Parameters} from "./modules/parameters";
 export {generateVerifierAndSalt, generateRandomBigint, generateRandomString} from './modules/utils'
