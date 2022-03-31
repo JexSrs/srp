@@ -1,5 +1,5 @@
-import {Routines} from "./modules/Routines";
-import {ServerState} from "./components/ServerState";
+import {Routines} from "./modules/routines";
+import {ServerState} from "./components/types";
 
 export class Server {
     constructor(private readonly routines: Routines) {}
@@ -12,7 +12,7 @@ export class Server {
 
     /**
      * Stores identity, salt and verifier.
-     * Generates public and private keys B and b.
+     * Generates public and private keys "B" and "b".
      * @param identity User's identity.
      * @param salt Salt stored in database.
      * @param verifier Verifier stored in database.
@@ -39,8 +39,8 @@ export class Server {
     }
 
     /**
-     * Compute the server session key "S"
-     * @param A Client public key "A"
+     * Compute the server session key "S".
+     * @param A Client public key "A".
      */
     sessionKey(A: bigint): bigint {
         if (A === null) throw new Error("Client public value (A) must not be null.");
@@ -57,8 +57,8 @@ export class Server {
     /**
      * Computes M2 and checks if client is authenticated.
      * @param A Client public key "A"
-     * @param M1 Client message "M1"
-     * @return M2 The server evidence message
+     * @param M1 Client message "M1".
+     * @return The server evidence message "M2".
      */
     step2(A: string, M1: string): string {
         if (!A || !A.trim()) throw new Error("Client public key (A) must not be null nor empty.");
@@ -77,7 +77,7 @@ export class Server {
     }
 
     /**
-     * Exports identity, salt, verifier, b and B values.
+     * Exports "identity", "salt", "verifier" values and "b", "B" keys.
      * Should be called after step1.
      */
     toJSON(): ServerState {
@@ -91,8 +91,9 @@ export class Server {
     }
 
     /**
-     * Generates Server session from existing values: identity, salt, verifier, b and B.
-     * @param routines The routines used when server session first generated.
+     * Generates client session from existing values "identity", "IH", "S", keys "A", "a" and client's
+     * evidence message "M1".
+     * @param routines The routines used for generating the above values and keys.
      * @param state The state object, usually can be accessed from toJSON().
      */
     static fromState(routines: Routines, state: ServerState) {

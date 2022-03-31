@@ -1,1 +1,0 @@
-export type HashFunction = (data: Uint8Array) => Uint8Array;
