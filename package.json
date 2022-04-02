@@ -1,12 +1,12 @@
 {
   "name": "@project-christopher/srp",
-  "version": "2.2.2",
+  "version": "2.2.3",
   "description": "",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "rm -rf dist && tsc",
-    "test": "tsc && mocha"
+    "test": "tsc && mocha --exit"
   },
   "repository": {
     "type": "git",

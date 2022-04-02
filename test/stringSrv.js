@@ -47,9 +47,9 @@ app.post('/login', function (req, res) {
 });
 
 
-const server = app.listen(5000, function () {
-    let host = server.address().address
-    let port = server.address().port
-
-    console.log("Listening at https://%s:%s", host, port)
-});
+// const server = app.listen(5000, function () {
+//     let host = server.address().address
+//     let port = server.address().port
+//
+//     console.log("Listening at https://%s:%s", host, port)
+// });
