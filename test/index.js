@@ -44,7 +44,7 @@ describe('Parameters', function () {
 describe('Wrong password', function () {
     this.timeout(2000);
 
-    for (let i = 1; i <= 10; i++) {
+    for (let i = 1; i <= 20; i++) {
         it(`Test ${i}`, () => {
             let routines = getRoutines(2048, 'SHA512'); // Default
 
