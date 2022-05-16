@@ -19,8 +19,25 @@ export class Client {
     constructor(options?: Partial<Options>) {
         let opts: any = options || {};
 
-        this.routines = opts.routines || new Routines();
-        this.routines.apply(opts);
+        this.routines = (opts.routines || new Routines()).apply(opts);
+
+        if(opts.clientState) {
+            // filled after step1
+            if (opts.clientState.identity)
+                this.I = opts.clientState.identity;
+            if (opts.clientState.IH)
+                this.IH = new Uint8Array(opts.clientState.IH);
+
+            // filled after step 2
+            if (opts.clientState.A)
+                this.A = BigInt("0x" + opts.clientState.A);
+            if (opts.clientState.a)
+                this.a = BigInt("0x" + opts.clientState.a);
+            if (opts.clientState.M1)
+                this.M1 = BigInt("0x" + opts.clientState.M1);
+            if (opts.clientState.S)
+                this.S = BigInt("0x" + opts.clientState.S);
+        }
     }
 
     private declare I: string;
@@ -106,31 +123,5 @@ export class Client {
             M1: M1 ? M1.toString(16) : "",
             S: S ? S.toString(16) : "",
         };
-    }
-
-    /**
-     * Generates Client session from existing values: identity, IH, A, a, M1 and S.
-     * @param options
-     */
-    static fromState(options: Partial<Options> & {state: ClientState}) {
-        let cl = new Client(options);
-
-        // filled after step1
-        if (options.state.identity)
-            cl.I = options.state.identity;
-        if (options.state.IH)
-            cl.IH = new Uint8Array(options.state.IH);
-
-        // filled after step 2
-        if (options.state.A)
-            cl.A = BigInt("0x" + options.state.A);
-        if (options.state.a)
-            cl.a = BigInt("0x" + options.state.a);
-        if (options.state.M1)
-            cl.M1 = BigInt("0x" + options.state.M1);
-        if (options.state.S)
-            cl.S = BigInt("0x" + options.state.S);
-
-        return cl;
     }
 }

@@ -18,7 +18,7 @@ app.post('/register', function (req, res) {
     console.log("=== Register open ===")
     let {salt, verifier, username} = req.body;
 
-    db = {username, salt, verifier}
+    db = {identity: username, salt, verifier}
     res.status(200).send(null);
     console.log("All good");
     console.log("=== Register close ===")
@@ -44,9 +44,9 @@ app.post('/login', function (req, res) {
         console.log("All good 1");
     }
     else if(step === "2") {
-        const server = Server.fromState({
+        const server = new Server({
             ...getRoutines(2048, 'SHA256'),
-            db
+            srvState: db
         });
         let M2 = server.step2(A, M1); // Verify client (if exception, then failed)
 

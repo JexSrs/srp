@@ -18,7 +18,7 @@ const routines = getRoutines(2048, 'SHA256');
 app.post('/register', function (req, res) {
     let {salt, verifier, username} = req.body;
 
-    db = {username, salt, verifier};
+    db = {identity: username, salt, verifier};
     res.status(200).end();
 })
 
@@ -44,9 +44,9 @@ app.post('/login', function (req, res) {
         res.status(200).send({salt: user.salt, B}); // Not json because we don't have a way to parse at java test (needs dependency)
     }
     else if(step === "2") {
-        const server = Server.fromState({
+        const server = new Server({
             ...getRoutines(2048, 'SHA256'),
-            db
+            state: db
         });
 
         let M2;

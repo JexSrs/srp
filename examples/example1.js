@@ -1,4 +1,4 @@
-const {Server, Client, Routines, generateVerifierAndSalt} = require('../dist');
+const {Server, Client, Routines} = require('../dist');
 
 function getRoutines(primeNum, hash) {
     return {

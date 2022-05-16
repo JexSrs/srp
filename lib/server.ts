@@ -6,18 +6,24 @@ export class Server {
 
     private readonly routines: Routines;
 
-    constructor(options?: Partial<Options>) {
-        let opts: any = options || {};
-
-        this.routines = opts.routines || new Routines();
-        this.routines.apply(opts);
-    }
-
     private declare I: string;
     private declare salt: bigint;
     private declare verifier: bigint;
     private declare b: bigint;
     private declare B: bigint;
+
+    constructor(options?: Partial<Options>) {
+        let opts: any = options || {};
+        this.routines = (opts.routines || new Routines()).apply(opts);
+
+        if(opts.srvState) {
+            this.I = opts.srvState.identity;
+            this.salt = BigInt("0x" + opts.srvState.salt);
+            this.verifier = BigInt("0x" + opts.srvState.verifier);
+            this.b = BigInt("0x" + opts.srvState.b);
+            this.B = BigInt("0x" + opts.srvState.B);
+        }
+    }
 
     /**
      * Stores identity, salt and verifier.
@@ -97,23 +103,5 @@ export class Server {
             b: this.b.toString(16),
             B: this.B.toString(16),
         };
-    }
-
-    /**
-     * Generates client session from existing values "identity", "IH", "S", keys "A", "a" and client's
-     * evidence message "M1".
-     * @param options
-     */
-    static fromState(options: Partial<Options> & {state: ServerState}) {
-        let srv = new Server(options);
-
-        // filled after step1
-        srv.I = options.state.identity;
-        srv.salt = BigInt("0x" + options.state.salt);
-        srv.verifier = BigInt("0x" + options.state.verifier);
-        srv.b = BigInt("0x" + options.state.b);
-        srv.B = BigInt("0x" + options.state.B);
-
-        return srv;
     }
 }

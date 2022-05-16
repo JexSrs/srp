@@ -76,10 +76,11 @@ export class Routines {
     private declare pg: PrimeGroup;
     private declare NBits: number;
 
-    apply(options: Partial<Options>) {
+    apply(options: Partial<Options>): Routines {
         this.pg = options.primeGroup || Routines.PrimeGroup[2048];
         this.hf = options.hashFunction || Routines.Hash.SHA512;
         this.NBits = this.pg.N.toString(2).length;
+        return this;
     }
 
     /**
