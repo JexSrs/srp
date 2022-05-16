@@ -1,17 +1,24 @@
 import {Routines} from "./modules/routines";
-import {ClientState, M1AndA} from "./components/types";
+import {ClientState, M1AndA, ServerState} from "./components/types";
+import {Options} from "./components/options";
 
 export class Client {
 
-    constructor(private readonly routines: Routines) {
+    private readonly routines: Routines;
+
+    constructor(options?: Partial<Options>) {
+        let opts: any = options || {};
+
+        this.routines = opts.routines || new Routines();
+        this.routines.apply(opts);
     }
 
-    private declare I: string
-    private declare IH: Uint8Array
-    private declare A: bigint
-    private declare a: bigint
-    private declare M1: bigint
-    private declare S: bigint
+    private declare I: string;
+    private declare IH: Uint8Array;
+    private declare A: bigint;
+    private declare a: bigint;
+    private declare M1: bigint;
+    private declare S: bigint;
 
     /**
      * Stores the user's identity and generates an identity hash ("IH") using the user's password.
@@ -93,27 +100,26 @@ export class Client {
 
     /**
      * Generates Client session from existing values: identity, IH, A, a, M1 and S.
-     * @param routines The routines used when client session first generated.
-     * @param state The state object, usually can be accessed from toJSON().
+     * @param options
      */
-    static fromState(routines: Routines, state: any) {
-        let cl = new Client(routines);
+    static fromState(options: Partial<Options> & {state: ClientState}) {
+        let cl = new Client(options);
 
         // filled after step1
-        if (state.identity)
-            cl.I = state.identity;
-        if (state.IH)
-            cl.IH = new Uint8Array(state.IH);
+        if (options.state.identity)
+            cl.I = options.state.identity;
+        if (options.state.IH)
+            cl.IH = new Uint8Array(options.state.IH);
 
         // filled after step 2
-        if (state.A)
-            cl.A = BigInt("0x" + state.A);
-        if (state.a)
-            cl.a = BigInt("0x" + state.a);
-        if (state.M1)
-            cl.M1 = BigInt("0x" + state.M1);
-        if (state.S)
-            cl.S = BigInt("0x" + state.S);
+        if (options.state.A)
+            cl.A = BigInt("0x" + options.state.A);
+        if (options.state.a)
+            cl.a = BigInt("0x" + options.state.a);
+        if (options.state.M1)
+            cl.M1 = BigInt("0x" + options.state.M1);
+        if (options.state.S)
+            cl.S = BigInt("0x" + options.state.S);
 
         return cl;
     }

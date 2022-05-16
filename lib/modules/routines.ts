@@ -72,15 +72,13 @@ export class Routines {
         }
     };
 
-    private readonly hf: HashFunction;
-    private readonly pg: PrimeGroup;
-    private readonly NBits: number;
+    private declare hf: HashFunction;
+    private declare pg: PrimeGroup;
+    private declare NBits: number;
 
-    constructor(options?: Options) {
-        let opts: any = options || {};
-
-        this.pg = opts.primeGroup || Routines.PrimeGroup[2048];
-        this.hf = opts.hf || Routines.Hash.SHA512;
+    apply(options: Partial<Options>) {
+        this.pg = options.primeGroup || Routines.PrimeGroup[2048];
+        this.hf = options.hashFunction || Routines.Hash.SHA512;
         this.NBits = this.pg.N.toString(2).length;
     }
 

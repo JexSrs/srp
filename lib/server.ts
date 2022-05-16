@@ -1,9 +1,16 @@
 import {Routines} from "./modules/routines";
 import {ServerState} from "./components/types";
+import {Options} from "./components/options";
 
 export class Server {
 
-    constructor(private readonly routines: Routines) {
+    private readonly routines: Routines;
+
+    constructor(options?: Partial<Options>) {
+        let opts: any = options || {};
+
+        this.routines = opts.routines || new Routines();
+        this.routines.apply(opts);
     }
 
     private declare I: string;
@@ -95,18 +102,17 @@ export class Server {
     /**
      * Generates client session from existing values "identity", "IH", "S", keys "A", "a" and client's
      * evidence message "M1".
-     * @param routines The routines used for generating the above values and keys.
-     * @param state The state object, usually can be accessed from toJSON().
+     * @param options
      */
-    static fromState(routines: Routines, state: ServerState) {
-        let srv = new Server(routines);
+    static fromState(options: Partial<Options> & {state: ServerState}) {
+        let srv = new Server(options);
 
         // filled after step1
-        srv.I = state.identity;
-        srv.salt = BigInt("0x" + state.salt);
-        srv.verifier = BigInt("0x" + state.verifier);
-        srv.b = BigInt("0x" + state.b);
-        srv.B = BigInt("0x" + state.B);
+        srv.I = options.state.identity;
+        srv.salt = BigInt("0x" + options.state.salt);
+        srv.verifier = BigInt("0x" + options.state.verifier);
+        srv.b = BigInt("0x" + options.state.b);
+        srv.B = BigInt("0x" + options.state.B);
 
         return srv;
     }
