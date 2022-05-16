@@ -13,7 +13,7 @@ function getRoutines(primeNum, hash) {
     };
 }
 
-const routines = getRoutines(2048, 'SHA256');
+const routines = getRoutines(2048, 'SHA512');
 
 app.post('/register', function (req, res) {
     let {salt, verifier, username} = req.body;
@@ -45,7 +45,7 @@ app.post('/login', function (req, res) {
     }
     else if(step === "2") {
         const server = new Server({
-            ...getRoutines(2048, 'SHA256'),
+            ...routines,
             state: db
         });
 

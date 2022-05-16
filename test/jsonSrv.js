@@ -14,6 +14,8 @@ function getRoutines(primeNum, hash) {
     };
 }
 
+const routines = getRoutines(2048, 'SHA512');
+
 app.post('/register', function (req, res) {
     console.log("=== Register open ===")
     let {salt, verifier, username} = req.body;
@@ -29,7 +31,7 @@ app.post('/login', function (req, res) {
     let {step, username, A, M1} = req.body;
 
     if(step === "1") {
-        const server = new Server(getRoutines(2048, 'SHA256'));
+        const server = new Server(routines);
         let user = db;
         if(!user) {
             res.status(422).send("failed!");
@@ -45,7 +47,7 @@ app.post('/login', function (req, res) {
     }
     else if(step === "2") {
         const server = new Server({
-            ...getRoutines(2048, 'SHA256'),
+            ...routines,
             srvState: db
         });
         let M2 = server.step2(A, M1); // Verify client (if exception, then failed)

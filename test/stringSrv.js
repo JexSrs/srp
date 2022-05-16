@@ -13,6 +13,8 @@ function getRoutines(primeNum, hash) {
     };
 }
 
+const routines = getRoutines(2048, 'SHA512');
+
 app.use(express.text({type:"*/*"}));
 app.post('/register', (req, res) => {
     console.log("=== Register open ===")
@@ -33,7 +35,7 @@ app.post('/login', (req, res) => {
     let {step, username, A, M1} = JSON.parse(req.body);
 
     if(step === "1") {
-        const server = new Server(getRoutines(2048, 'SHA256'));
+        const server = new Server(routines);
 
         const B = server.step1(username, db.salt, db.verifier); // Generate server's public key
         db = server.toJSON();
@@ -44,7 +46,7 @@ app.post('/login', (req, res) => {
     }
     else if(step === "2") {
         const server = new Server({
-            ...getRoutines(2048, 'SHA256'),
+            ...routines,
             srvState: db
         });
         let M2 = server.step2(A, M1); // Verify client (if exception, then failed)
@@ -57,9 +59,9 @@ app.post('/login', (req, res) => {
 });
 
 
-const server = app.listen(5000, function () {
-    let host = server.address().address
-    let port = server.address().port
-
-    console.log("Listening at https://%s:%s", host, port)
-});
+// const server = app.listen(5000, function () {
+//     let host = server.address().address
+//     let port = server.address().port
+//
+//     console.log("Listening at https://%s:%s", host, port)
+// });
