@@ -1,18 +1,25 @@
-const {Server, Routines, Parameters} = require('../dist');
+const {Server, Routines} = require('../dist');
 const express = require('express');
-const {generateRandomBigint} = require("../lib");
 const app = express();
 
 app.use(express.json());
 
 let db = {};
-let routines = new Routines(new Parameters())
+function getRoutines(primeNum, hash) {
+    return {
+        routines: new Routines(),
+        hashFunction: Routines.Hash[hash],
+        primeGroup: Routines.PrimeGroup[primeNum]
+    };
+}
+
+const routines = getRoutines(2048, 'SHA512');
 
 app.post('/register', function (req, res) {
     let {salt, verifier, username} = req.body;
 
-    db = {username, salt, verifier}
-    res.status(200).send(null);
+    db = {identity: username, salt, verifier};
+    res.status(200).end();
 })
 
 app.post('/login', function (req, res) {
@@ -37,7 +44,10 @@ app.post('/login', function (req, res) {
         res.status(200).send({salt: user.salt, B}); // Not json because we don't have a way to parse at java test (needs dependency)
     }
     else if(step === "2") {
-        const server = Server.fromState(routines, db);
+        const server = new Server({
+            ...routines,
+            state: db
+        });
 
         let M2;
         try {

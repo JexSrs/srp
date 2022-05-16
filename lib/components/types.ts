@@ -1,7 +1,7 @@
 export type ClientState = {
     identity: string;
-    IH: Array<number>; // standard Array representation of the Uint8Array
-    A: string; // hex representation of bigint
+    IH: Array<number>;
+    A: string;
     a: string;
     M1: string;
     S: string;
@@ -9,7 +9,7 @@ export type ClientState = {
 
 export type ServerState = {
     identity: string;
-    salt: string; // hex representation of bigint
+    salt: string;
     verifier: string;
     B: string;
     b: string;

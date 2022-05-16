@@ -1,14 +1,29 @@
 import {Routines} from "./modules/routines";
 import {ServerState} from "./components/types";
+import {Options} from "./components/options";
 
 export class Server {
-    constructor(private readonly routines: Routines) {}
 
-    private declare I: string
-    private declare salt: bigint
-    private declare verifier: bigint
-    private declare b: bigint
-    private declare B: bigint
+    private readonly routines: Routines;
+
+    private declare I: string;
+    private declare salt: bigint;
+    private declare verifier: bigint;
+    private declare b: bigint;
+    private declare B: bigint;
+
+    constructor(options?: Partial<Options>) {
+        let opts: any = options || {};
+        this.routines = (opts.routines || new Routines()).apply(opts);
+
+        if(opts.srvState) {
+            this.I = opts.srvState.identity;
+            this.salt = BigInt("0x" + opts.srvState.salt);
+            this.verifier = BigInt("0x" + opts.srvState.verifier);
+            this.b = BigInt("0x" + opts.srvState.b);
+            this.B = BigInt("0x" + opts.srvState.B);
+        }
+    }
 
     /**
      * Stores identity, salt and verifier.
@@ -23,7 +38,7 @@ export class Server {
         if (!salt || !salt.trim()) throw new Error("Salt must not be null nor empty.");
         if (!verifier || !verifier.trim()) throw new Error("Verifier must not be null nor empty.");
 
-        let v =  BigInt("0x" + verifier)
+        let v = BigInt("0x" + verifier)
 
         const b = this.routines.generatePrivateValue();
         const k = this.routines.computeK();
@@ -88,24 +103,5 @@ export class Server {
             b: this.b.toString(16),
             B: this.B.toString(16),
         };
-    }
-
-    /**
-     * Generates client session from existing values "identity", "IH", "S", keys "A", "a" and client's
-     * evidence message "M1".
-     * @param routines The routines used for generating the above values and keys.
-     * @param state The state object, usually can be accessed from toJSON().
-     */
-    static fromState(routines: Routines, state: ServerState) {
-        let srv = new Server(routines);
-
-        // filled after step1
-        srv.I = state.identity;
-        srv.salt = BigInt("0x" + state.salt);
-        srv.verifier = BigInt("0x" + state.verifier);
-        srv.b = BigInt("0x" + state.b);
-        srv.B = BigInt("0x" + state.B);
-
-        return srv;
     }
 }

@@ -1,15 +1,51 @@
 import {Routines} from "./modules/routines";
-import {ClientState, M1AndA} from "./components/types";
+import {ClientState, IVerifierAndSalt, M1AndA, ServerState} from "./components/types";
+import {Options} from "./components/options";
+import {generateVerifierAndSalt} from "./modules/utils";
+import {VerifierOptions} from "./components/cryptoTypes";
 
 export class Client {
-    constructor(private readonly routines: Routines) {}
 
-    private declare I: string
-    private declare IH: Uint8Array
-    private declare A: bigint
-    private declare a: bigint
-    private declare M1: bigint
-    private declare S: bigint
+    /**
+     * Generate user's credentials.
+     * @param options
+     */
+    static register(options: VerifierOptions): IVerifierAndSalt {
+        return generateVerifierAndSalt(options);
+    }
+
+    private readonly routines: Routines;
+
+    constructor(options?: Partial<Options>) {
+        let opts: any = options || {};
+
+        this.routines = (opts.routines || new Routines()).apply(opts);
+
+        if(opts.clientState) {
+            // filled after step1
+            if (opts.clientState.identity)
+                this.I = opts.clientState.identity;
+            if (opts.clientState.IH)
+                this.IH = new Uint8Array(opts.clientState.IH);
+
+            // filled after step 2
+            if (opts.clientState.A)
+                this.A = BigInt("0x" + opts.clientState.A);
+            if (opts.clientState.a)
+                this.a = BigInt("0x" + opts.clientState.a);
+            if (opts.clientState.M1)
+                this.M1 = BigInt("0x" + opts.clientState.M1);
+            if (opts.clientState.S)
+                this.S = BigInt("0x" + opts.clientState.S);
+        }
+    }
+
+    private declare I: string;
+    private declare IH: Uint8Array;
+    private declare A: bigint;
+    private declare a: bigint;
+    private declare M1: bigint;
+    private declare S: bigint;
 
     /**
      * Stores the user's identity and generates an identity hash ("IH") using the user's password.
@@ -87,32 +123,5 @@ export class Client {
             M1: M1 ? M1.toString(16) : "",
             S: S ? S.toString(16) : "",
         };
-    }
-
-    /**
-     * Generates Client session from existing values: identity, IH, A, a, M1 and S.
-     * @param routines The routines used when client session first generated.
-     * @param state The state object, usually can be accessed from toJSON().
-     */
-    static fromState(routines: Routines, state: any) {
-        let cl = new Client(routines);
-
-        // filled after step1
-        if(state.identity)
-            cl.I = state.identity;
-        if(state.IH)
-            cl.IH = new Uint8Array(state.IH);
-
-        // filled after step 2
-        if(state.A)
-            cl.A = BigInt("0x" + state.A);
-        if(state.a)
-            cl.a = BigInt("0x" + state.a);
-        if(state.M1)
-            cl.M1 = BigInt("0x" + state.M1);
-        if(state.S)
-            cl.S = BigInt("0x" + state.S);
-
-        return cl;
     }
 }

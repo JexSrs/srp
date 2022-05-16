@@ -1,4 +1,4 @@
-const {Server, Routines, Parameters} = require('../dist');
+const {Server, Routines} = require('../dist');
 const express = require('express');
 const app = express();
 
@@ -6,11 +6,21 @@ app.use(express.json());
 
 let db = {};
 
+function getRoutines(primeNum, hash) {
+    return {
+        routines: new Routines(),
+        hashFunction: Routines.Hash[hash],
+        primeGroup: Routines.PrimeGroup[primeNum]
+    };
+}
+
+const routines = getRoutines(2048, 'SHA512');
+
 app.post('/register', function (req, res) {
     console.log("=== Register open ===")
     let {salt, verifier, username} = req.body;
 
-    db = {username, salt, verifier}
+    db = {identity: username, salt, verifier}
     res.status(200).send(null);
     console.log("All good");
     console.log("=== Register close ===")
@@ -21,7 +31,7 @@ app.post('/login', function (req, res) {
     let {step, username, A, M1} = req.body;
 
     if(step === "1") {
-        const server = new Server(new Routines(new Parameters()));
+        const server = new Server(routines);
         let user = db;
         if(!user) {
             res.status(422).send("failed!");
@@ -36,7 +46,10 @@ app.post('/login', function (req, res) {
         console.log("All good 1");
     }
     else if(step === "2") {
-        const server = Server.fromState(new Routines(new Parameters()), db);
+        const server = new Server({
+            ...routines,
+            srvState: db
+        });
         let M2 = server.step2(A, M1); // Verify client (if exception, then failed)
 
         res.status(200).send({M2});
