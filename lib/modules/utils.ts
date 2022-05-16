@@ -4,6 +4,11 @@ import {bigintToBytes, bytesToBigint,} from './transformations'
 import {HashFunction, VerifierOptions} from "../components/cryptoTypes";
 import {Options} from "../components/options";
 
+const ZERO: bigint = BigInt(0);
+const ONE: bigint = BigInt(1);
+const TWO: bigint = BigInt(2);
+
+
 /**
  * Left pad bytes array with zeroes.
  * @param array
@@ -86,10 +91,6 @@ export function hashBitCount(hf: HashFunction): number {
  * @param mod modulo, positive modulo for division.
  */
 export function modPow(x: bigint, pow: bigint, mod: bigint): bigint {
-    const ZERO: bigint = BigInt(0);
-    const ONE: bigint = BigInt(1);
-    const TWO: bigint = BigInt(2);
-
     if (x < ZERO) throw new Error("Invalid base: " + x.toString());
     if (pow < ZERO) throw new Error("Invalid power: " + pow.toString());
     if (mod < ONE) throw new Error("Invalid modulo: " + mod.toString());
@@ -129,9 +130,7 @@ export function createVerifier(options: Partial<Options> & {identity: string; sa
  * @param options
  */
 export function generateVerifierAndSalt(options: VerifierOptions): IVerifierAndSalt {
-    options.routines = options.routines || new Routines();
-    options.routines.apply(options);
-
+    options.routines = (options.routines || new Routines()).apply(options);
     const s = options.routines.generateRandomSalt(options.sBytes);
     return {
         salt: s.toString(16),

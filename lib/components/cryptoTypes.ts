@@ -1,9 +1,8 @@
 import {Options} from "./options";
 
-
 export type PrimeGroup = {
     N: bigint; // the prime
-    g: bigint; // a generator of the multiplicative group Zn
+    g: bigint;
 };
 
 export type HashFunction = (data: Uint8Array) => Uint8Array;
