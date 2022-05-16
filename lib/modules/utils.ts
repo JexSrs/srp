@@ -1,7 +1,7 @@
-import {Parameters} from "./parameters";
 import {Routines} from "./routines";
 import {IVerifierAndSalt} from "../components/types";
-import {bytesToBigint, bigintToBytes,} from './transformations'
+import {bigintToBytes, bytesToBigint,} from './transformations'
+import {HashFunction} from "../components/cryptoTypes";
 
 /**
  * Left pad bytes array with zeroes.
@@ -22,10 +22,10 @@ export function padStartBytesArray(array: Uint8Array, targetLength: number): Uin
 
 /**
  * Generates a hash from byte arrays.
- * @param options
+ * @param hf
  * @param bytes
  */
-export function hash(options: Parameters, ...bytes: Uint8Array[]): Uint8Array {
+export function hash(hf: HashFunction, ...bytes: Uint8Array[]): Uint8Array {
     const length = bytes.reduce((p, c) => p + c.byteLength, 0);
 
     const target = new Uint8Array(length);
@@ -34,21 +34,21 @@ export function hash(options: Parameters, ...bytes: Uint8Array[]): Uint8Array {
         offset += bytes[i].byteLength;
     }
 
-    return options.options.hashFunction(target);
+    return hf(target);
 }
 
 /**
  * Left pad byte arrays with zeroes and generates a hash from it.
- * @param options
+ * @param hf
  * @param targetLen Length of the target array in bytes.
  * @param arrays
  */
-export function hashPadded(options: Parameters, targetLen: number, ...arrays: Uint8Array[]): Uint8Array {
+export function hashPadded(hf: HashFunction, targetLen: number, ...arrays: Uint8Array[]): Uint8Array {
     const arraysPadded = arrays.map((bytesArray) =>
         padStartBytesArray(bytesArray, targetLen),
     );
 
-    return hash(options, ...arraysPadded);
+    return hash(hf, ...arraysPadded);
 }
 
 /**
@@ -56,7 +56,7 @@ export function hashPadded(options: Parameters, targetLen: number, ...arrays: Ui
  * @param length
  */
 export function generateRandomString(length: number): string {
-    const u8 = Parameters.cryptoFunctions.randomBytes(length / 2); // each byte has 2 hex digits
+    const u8 = Routines.randomBytes(length / 2); // each byte has 2 hex digits
     return u8.reduce((str, i) => {
         const hex = i.toString(16).toString();
         if (hex.length === 1)
@@ -71,7 +71,40 @@ export function generateRandomString(length: number): string {
  * @param numBytes Length of the bigint in bytes.
  */
 export function generateRandomBigint(numBytes: number = 16): bigint {
-    return bytesToBigint(Parameters.cryptoFunctions.randomBytes(numBytes));
+    return bytesToBigint(Routines.randomBytes(numBytes));
+}
+
+export function hashBitCount(hf: HashFunction): number {
+    return hash(hf, bigintToBytes(BigInt(1))).byteLength * 8;
+}
+
+/**
+ * Calculates (x**pow) % mod
+ * @param x base, non negative big int.
+ * @param pow power, non-negative power.
+ * @param mod modulo, positive modulo for division.
+ */
+export function modPow(x: bigint, pow: bigint, mod: bigint): bigint {
+    const ZERO: bigint = BigInt(0);
+    const ONE: bigint = BigInt(1);
+    const TWO: bigint = BigInt(2);
+
+    if (x < ZERO) throw new Error("Invalid base: " + x.toString());
+    if (pow < ZERO) throw new Error("Invalid power: " + pow.toString());
+    if (mod < ONE) throw new Error("Invalid modulo: " + mod.toString());
+
+    let result: bigint = ONE;
+    while (pow > ZERO) {
+        if (pow % TWO == ONE) {
+            result = (x * result) % mod;
+            pow -= ONE;
+        } else {
+            x = (x * x) % mod;
+            pow /= TWO;
+        }
+    }
+
+    return result;
 }
 
 /**
@@ -102,11 +135,4 @@ export function generateVerifierAndSalt(routines: Routines, identity: string, pa
 
     return {salt: s.toString(16), verifier: createVerifier(routines, identity, s, password).toString(16)};
 }
-
-export function hashBitCount(options: Parameters): number {
-    return hash(options, bigintToBytes(BigInt(1))).byteLength * 8;
-}
-
-
-
 

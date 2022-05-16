@@ -1,11 +1,14 @@
 const expect = require('chai').expect;
-const {Server, Client, Routines, Parameters, generateVerifierAndSalt, generateRandomString} = require('../dist');
+const {Server, Client, Routines, generateVerifierAndSalt, generateRandomString} = require('../dist');
 
 const primeNums = [256, 512, 768, 1024, 1536, 2048, 3072, 4096, 6144, 8192];
 const hashes = ['SHA1', 'SHA256', 'SHA384', 'SHA512'];
 
 function getRoutines(primeNum, hash) {
-    return new Routines(new Parameters(Parameters.PrimeGroup[primeNum], Parameters.Hash[hash]));
+    return new Routines({
+        hashFunction: Routines.Hash[hash],
+        primeGroup: Routines.PrimeGroup[primeNum]
+    });
 }
 
 describe('Parameters', function () {

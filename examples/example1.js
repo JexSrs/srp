@@ -1,4 +1,11 @@
-const {Server, Client, Routines, Parameters, generateVerifierAndSalt} = require('../dist');
+const {Server, Client, Routines, generateVerifierAndSalt} = require('../dist');
+
+function getRoutines(primeNum, hash) {
+    return new Routines({
+        hashFunction: Routines.Hash[hash],
+        primeGroup: Routines.PrimeGroup[primeNum]
+    });
+}
 
 let db = [];
 
@@ -8,7 +15,7 @@ let db = [];
     const username = "projectChristopher";
     const password = "password";
 
-    let routines = new Routines(new Parameters());
+    let routines = getRoutines(2048, 'SHA256');
     let {salt, verifier} = generateVerifierAndSalt(routines, username, password);
     /* sendToServer(username, salt, verifier) */
 
@@ -23,13 +30,13 @@ let db = [];
     const username = "projectChristopher";
     let password = "password";
 
-    const client = new Client(new Routines(new Parameters()));
+    const client = new Client(getRoutines(2048, 'SHA256'));
     client.step1(username, password);
     password = ''; // No longer needed.
     /* sendToServer(username) */
 
     // Server
-    const server = new Server(new Routines(new Parameters()));
+    const server = new Server(getRoutines(2048, 'SHA256'));
     let document = db.find(doc => doc.username === username);
     if(!document) {
         // Send random data to avoid if user exists

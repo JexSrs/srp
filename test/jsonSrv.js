@@ -6,6 +6,13 @@ app.use(express.json());
 
 let db = {};
 
+function getRoutines(primeNum, hash) {
+    return new Routines({
+        hashFunction: Routines.Hash[hash],
+        primeGroup: Routines.PrimeGroup[primeNum]
+    });
+}
+
 app.post('/register', function (req, res) {
     console.log("=== Register open ===")
     let {salt, verifier, username} = req.body;
@@ -21,7 +28,7 @@ app.post('/login', function (req, res) {
     let {step, username, A, M1} = req.body;
 
     if(step === "1") {
-        const server = new Server(new Routines(new Parameters()));
+        const server = new Server(getRoutines(2048, 'SHA256'));
         let user = db;
         if(!user) {
             res.status(422).send("failed!");
@@ -36,7 +43,7 @@ app.post('/login', function (req, res) {
         console.log("All good 1");
     }
     else if(step === "2") {
-        const server = Server.fromState(new Routines(new Parameters()), db);
+        const server = Server.fromState(getRoutines(2048, 'SHA256'), db);
         let M2 = server.step2(A, M1); // Verify client (if exception, then failed)
 
         res.status(200).send({M2});

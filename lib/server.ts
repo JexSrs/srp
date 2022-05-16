@@ -3,7 +3,8 @@ import {ServerState} from "./components/types";
 
 export class Server {
 
-    constructor(private readonly routines: Routines) {}
+    constructor(private readonly routines: Routines) {
+    }
 
     private declare I: string;
     private declare salt: bigint;
@@ -24,7 +25,7 @@ export class Server {
         if (!salt || !salt.trim()) throw new Error("Salt must not be null nor empty.");
         if (!verifier || !verifier.trim()) throw new Error("Verifier must not be null nor empty.");
 
-        let v =  BigInt("0x" + verifier)
+        let v = BigInt("0x" + verifier)
 
         const b = this.routines.generatePrivateValue();
         const k = this.routines.computeK();

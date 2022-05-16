@@ -2,7 +2,9 @@ import {Routines} from "./modules/routines";
 import {ClientState, M1AndA} from "./components/types";
 
 export class Client {
-    constructor(private readonly routines: Routines) {}
+
+    constructor(private readonly routines: Routines) {
+    }
 
     private declare I: string
     private declare IH: Uint8Array
@@ -98,19 +100,19 @@ export class Client {
         let cl = new Client(routines);
 
         // filled after step1
-        if(state.identity)
+        if (state.identity)
             cl.I = state.identity;
-        if(state.IH)
+        if (state.IH)
             cl.IH = new Uint8Array(state.IH);
 
         // filled after step 2
-        if(state.A)
+        if (state.A)
             cl.A = BigInt("0x" + state.A);
-        if(state.a)
+        if (state.a)
             cl.a = BigInt("0x" + state.a);
-        if(state.M1)
+        if (state.M1)
             cl.M1 = BigInt("0x" + state.M1);
-        if(state.S)
+        if (state.S)
             cl.S = BigInt("0x" + state.S);
 
         return cl;

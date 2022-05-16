@@ -1,18 +1,24 @@
-const {Server, Routines, Parameters} = require('../dist');
+const {Server, Routines} = require('../dist');
 const express = require('express');
-const {generateRandomBigint} = require("../lib");
 const app = express();
 
 app.use(express.json());
 
 let db = {};
-let routines = new Routines(new Parameters())
+function getRoutines(primeNum, hash) {
+    return new Routines({
+        hashFunction: Routines.Hash[hash],
+        primeGroup: Routines.PrimeGroup[primeNum]
+    });
+}
+
+const routines = getRoutines(2048, 'SHA256');
 
 app.post('/register', function (req, res) {
     let {salt, verifier, username} = req.body;
 
-    db = {username, salt, verifier}
-    res.status(200).send(null);
+    db = {username, salt, verifier};
+    res.status(200).end();
 })
 
 app.post('/login', function (req, res) {
