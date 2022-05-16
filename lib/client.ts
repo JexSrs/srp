@@ -1,8 +1,18 @@
 import {Routines} from "./modules/routines";
-import {ClientState, M1AndA, ServerState} from "./components/types";
+import {ClientState, IVerifierAndSalt, M1AndA, ServerState} from "./components/types";
 import {Options} from "./components/options";
+import {generateVerifierAndSalt} from "./modules/utils";
+import {VerifierOptions} from "./components/cryptoTypes";
 
 export class Client {
+
+    /**
+     * Generate user's credentials.
+     * @param options
+     */
+    static register(options: VerifierOptions): IVerifierAndSalt {
+        return generateVerifierAndSalt(options);
+    }
 
     private readonly routines: Routines;
 

@@ -1,10 +1,11 @@
 const {Server, Client, Routines, generateVerifierAndSalt} = require('../dist');
 
 function getRoutines(primeNum, hash) {
-    return new Routines({
+    return {
+        routines: new Routines(),
         hashFunction: Routines.Hash[hash],
         primeGroup: Routines.PrimeGroup[primeNum]
-    });
+    };
 }
 
 let db = [];
@@ -16,7 +17,7 @@ let db = [];
     const password = "password";
 
     let routines = getRoutines(2048, 'SHA256');
-    let {salt, verifier} = generateVerifierAndSalt(routines, username, password);
+    let {salt, verifier} = Client.register({...routines, identity: username, password});
     /* sendToServer(username, salt, verifier) */
 
     // Server

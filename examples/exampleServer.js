@@ -6,10 +6,11 @@ app.use(express.json());
 
 let db = {};
 function getRoutines(primeNum, hash) {
-    return new Routines({
+    return {
+        routines: new Routines(),
         hashFunction: Routines.Hash[hash],
         primeGroup: Routines.PrimeGroup[primeNum]
-    });
+    };
 }
 
 const routines = getRoutines(2048, 'SHA256');
@@ -43,7 +44,10 @@ app.post('/login', function (req, res) {
         res.status(200).send({salt: user.salt, B}); // Not json because we don't have a way to parse at java test (needs dependency)
     }
     else if(step === "2") {
-        const server = Server.fromState(routines, db);
+        const server = Server.fromState({
+            ...getRoutines(2048, 'SHA256'),
+            db
+        });
 
         let M2;
         try {

@@ -1,7 +1,8 @@
 import {Routines} from "./routines";
 import {IVerifierAndSalt} from "../components/types";
 import {bigintToBytes, bytesToBigint,} from './transformations'
-import {HashFunction} from "../components/cryptoTypes";
+import {HashFunction, VerifierOptions} from "../components/cryptoTypes";
+import {Options} from "../components/options";
 
 /**
  * Left pad bytes array with zeroes.
@@ -109,30 +110,35 @@ export function modPow(x: bigint, pow: bigint, mod: bigint): bigint {
 
 /**
  * Generates a random verifier.
- * @param routines
- * @param identity
- * @param salt
- * @param password
+ * @param options
  */
-export function createVerifier(routines: Routines, identity: string, salt: bigint, password: string): bigint {
-    if (!identity || !identity.trim()) throw new Error("Identity (I) must not be null or empty.")
-    if (!salt) throw new Error("Salt (s) must not be null.");
-    if (!password || !password.trim()) throw new Error("Password (P) must not be null  or empty.");
+export function createVerifier(options: Partial<Options> & {identity: string; salt: bigint; password: string;}): bigint {
+    if (!options.identity || !options.identity.trim()) throw new Error("Identity (I) must not be null or empty.")
+    if (!options.salt) throw new Error("Salt (s) must not be null.");
+    if (!options.password || !options.password.trim()) throw new Error("Password (P) must not be null  or empty.");
 
-    const x = routines.computeX(identity, salt, password);
+    let routines = options.routines || new Routines();
+    routines.apply(options);
+
+    const x = routines.computeX(options.identity, options.salt, options.password);
     return routines.computeVerifier(x);
 }
 
 /**
  * Generates salt and verifier.
- * @param routines
- * @param identity
- * @param password
- * @param sBytes Length of salt in bytes.
+ * @param options
  */
-export function generateVerifierAndSalt(routines: Routines, identity: string, password: string, sBytes?: number): IVerifierAndSalt {
-    const s = routines.generateRandomSalt(sBytes);
+export function generateVerifierAndSalt(options: VerifierOptions): IVerifierAndSalt {
+    options.routines = options.routines || new Routines();
+    options.routines.apply(options);
 
-    return {salt: s.toString(16), verifier: createVerifier(routines, identity, s, password).toString(16)};
+    const s = options.routines.generateRandomSalt(options.sBytes);
+    return {
+        salt: s.toString(16),
+        verifier: createVerifier({
+            ...options,
+            salt: s
+        }).toString(16)
+    };
 }
 
