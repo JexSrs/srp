@@ -1,11 +1,7 @@
 import {Parameters} from "./parameters";
-import {Crypto} from "./crypto";
 import {Routines} from "./routines";
 import {IVerifierAndSalt} from "../components/types";
 import {bytesToBigint, bigintToBytes,} from './transformations'
-import {ONE} from "./bigintMath";
-
-const cc = Crypto.compatibleCrypto()
 
 /**
  * Left pad bytes array with zeroes.
@@ -15,22 +11,21 @@ const cc = Crypto.compatibleCrypto()
  *          array length.
  */
 export function padStartBytesArray(array: Uint8Array, targetLength: number): Uint8Array {
-    const u8 = new Uint8Array(array);
-    if (u8.length < targetLength) {
-        const tmp = new Uint8Array(targetLength);
-        tmp.fill(0, 0, targetLength - u8.length);
-        tmp.set(u8, targetLength - u8.length);
-        return tmp;
-    }
+    if (array.length >= targetLength)
+        return array;
+
+    const u8 = new Uint8Array(targetLength);
+    u8.fill(0, 0, targetLength - array.length);
+    u8.set(array, targetLength - array.length);
     return u8;
 }
 
 /**
  * Generates a hash from byte arrays.
- * @param parameters
+ * @param options
  * @param bytes
  */
-export function hash(parameters: Parameters, ...bytes: Uint8Array[]): Uint8Array {
+export function hash(options: Parameters, ...bytes: Uint8Array[]): Uint8Array {
     const length = bytes.reduce((p, c) => p + c.byteLength, 0);
 
     const target = new Uint8Array(length);
@@ -39,29 +34,21 @@ export function hash(parameters: Parameters, ...bytes: Uint8Array[]): Uint8Array
         offset += bytes[i].byteLength;
     }
 
-    return parameters.hash(target);
+    return options.options.hashFunction(target);
 }
 
 /**
  * Left pad byte arrays with zeroes and generates a hash from it.
- * @param parameters
+ * @param options
  * @param targetLen Length of the target array in bytes.
  * @param arrays
  */
-export function hashPadded(parameters: Parameters, targetLen: number, ...arrays: Uint8Array[]): Uint8Array {
+export function hashPadded(options: Parameters, targetLen: number, ...arrays: Uint8Array[]): Uint8Array {
     const arraysPadded = arrays.map((bytesArray) =>
         padStartBytesArray(bytesArray, targetLen),
     );
 
-    return hash(parameters, ...arraysPadded);
-}
-
-/**
- * Generates random bytes array.
- * @param length
- */
-function generateRandom(length: number): Uint8Array {
-    return cc.randomBytes(length);
+    return hash(options, ...arraysPadded);
 }
 
 /**
@@ -69,7 +56,7 @@ function generateRandom(length: number): Uint8Array {
  * @param length
  */
 export function generateRandomString(length: number): string {
-    const u8 = cc.randomBytes(length / 2); // each byte has 2 hex digits
+    const u8 = Parameters.cryptoFunctions.randomBytes(length / 2); // each byte has 2 hex digits
     return u8.reduce((str, i) => {
         const hex = i.toString(16).toString();
         if (hex.length === 1)
@@ -84,7 +71,7 @@ export function generateRandomString(length: number): string {
  * @param numBytes Length of the bigint in bytes.
  */
 export function generateRandomBigint(numBytes: number = 16): bigint {
-    return bytesToBigint(generateRandom(numBytes));
+    return bytesToBigint(Parameters.cryptoFunctions.randomBytes(numBytes));
 }
 
 /**
@@ -116,8 +103,8 @@ export function generateVerifierAndSalt(routines: Routines, identity: string, pa
     return {salt: s.toString(16), verifier: createVerifier(routines, identity, s, password).toString(16)};
 }
 
-export function hashBitCount(parameters: Parameters): number {
-    return hash(parameters, bigintToBytes(ONE)).byteLength * 8;
+export function hashBitCount(options: Parameters): number {
+    return hash(options, bigintToBytes(BigInt(1))).byteLength * 8;
 }
 
 

@@ -2,13 +2,14 @@ import {Routines} from "./modules/routines";
 import {ServerState} from "./components/types";
 
 export class Server {
+
     constructor(private readonly routines: Routines) {}
 
-    private declare I: string
-    private declare salt: bigint
-    private declare verifier: bigint
-    private declare b: bigint
-    private declare B: bigint
+    private declare I: string;
+    private declare salt: bigint;
+    private declare verifier: bigint;
+    private declare b: bigint;
+    private declare B: bigint;
 
     /**
      * Stores identity, salt and verifier.

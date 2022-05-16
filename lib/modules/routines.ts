@@ -1,28 +1,47 @@
 import {Parameters} from "./parameters";
-import {
-    generateRandomBigint,
-    hash,
-    hashBitCount,
-    hashPadded
-} from "./utils";
-import {
-    bigintToBytes,
-    bytesToBigint,
-    stringToByteArray
-} from './transformations'
-import {
-    modPow, ZERO
-} from './bigintMath'
+import {generateRandomBigint, hash, hashBitCount, hashPadded} from "./utils";
+import {bigintToBytes, bytesToBigint, stringToByteArray} from './transformations'
 
 export class Routines {
-    constructor(public readonly parameters: Parameters = new Parameters()) {}
+    constructor(public readonly options: Parameters = new Parameters()) {
+    }
+
+    /**
+     * Calculates (x**pow) % mod
+     * @param x base, non negative big int.
+     * @param pow power, non-negative power.
+     * @param mod modulo, positive modulo for division.
+     */
+    private modPow(x: bigint, pow: bigint, mod: bigint): bigint {
+        const ZERO: bigint = BigInt(0);
+        const ONE: bigint = BigInt(1);
+        const TWO: bigint = BigInt(2);
+
+        if (x < ZERO) throw new Error("Invalid base: " + x.toString());
+        if (pow < ZERO) throw new Error("Invalid power: " + pow.toString());
+        if (mod < ONE) throw new Error("Invalid modulo: " + mod.toString());
+
+        let result: bigint = ONE;
+        while (pow > ZERO) {
+            if (pow % TWO == ONE) {
+                result = (x * result) % mod;
+                pow -= ONE;
+            }
+            else {
+                x = (x * x) % mod;
+                pow /= TWO;
+            }
+        }
+
+        return result;
+    }
 
     /**
      * Hash a collection of byte arrays.
      * @param ab
      */
     hash(...ab: Uint8Array[]): Uint8Array {
-        return hash(this.parameters, ...ab);
+        return hash(this.options, ...ab);
     }
 
     /**
@@ -30,16 +49,16 @@ export class Routines {
      * @param ab
      */
     hashPadded(...ab: Uint8Array[]): Uint8Array {
-        const targetLength = Math.trunc((this.parameters.NBits + 7) / 8);
-        return hashPadded(this.parameters, targetLength, ...ab);
+        const targetLength = Math.trunc((this.options.options.NBits + 7) / 8);
+        return hashPadded(this.options, targetLength, ...ab);
     }
 
     /** Computes K. */
     computeK(): bigint {
         return bytesToBigint(
             this.hashPadded(
-                bigintToBytes(this.parameters.primeGroup.N),
-                bigintToBytes(this.parameters.primeGroup.g)
+                bigintToBytes(this.options.options.primeGroup.N),
+                bigintToBytes(this.options.options.primeGroup.g)
             )
         );
     }
@@ -49,7 +68,7 @@ export class Routines {
      * @param numBytes Length of salt in bytes.
      */
     generateRandomSalt(numBytes?: number): bigint {
-        const HBits = hashBitCount(this.parameters);
+        const HBits = hashBitCount(this.options);
         const saltBytes = numBytes || (2 * HBits) / 8;
         return generateRandomBigint(saltBytes);
     }
@@ -97,20 +116,20 @@ export class Routines {
      * @param x
      */
     computeVerifier(x: bigint): bigint {
-        return modPow(this.parameters.primeGroup.g, x, this.parameters.primeGroup.N);
+        return this.modPow(this.options.options.primeGroup.g, x, this.options.options.primeGroup.N);
     }
 
     /**
      * Generates private key ("a" or "b") for the client or server.
      */
     generatePrivateValue(): bigint {
-        const numBits = Math.max(256, this.parameters.NBits);
+        const numBits = Math.max(256, this.options.options.NBits);
         let bi: bigint;
 
         do {
-            bi = generateRandomBigint(numBits / 8) % this.parameters.primeGroup.N;
+            bi = generateRandomBigint(numBits / 8) % this.options.options.primeGroup.N;
         }
-        while (bi === ZERO);
+        while (bi === BigInt(0));
 
         return bi;
     }
@@ -120,7 +139,7 @@ export class Routines {
      * @param a The client's private key "a".
      */
     computeClientPublicValue(a: bigint): bigint {
-        return modPow(this.parameters.primeGroup.g, a, this.parameters.primeGroup.N);
+        return this.modPow(this.options.options.primeGroup.g, a, this.options.options.primeGroup.N);
     }
 
     /**
@@ -131,8 +150,8 @@ export class Routines {
      */
     computeServerPublicValue(k: bigint, verifier: bigint, b: bigint): bigint {
         return (
-            (modPow(this.parameters.primeGroup.g, b, this.parameters.primeGroup.N) + verifier * k) %
-            this.parameters.primeGroup.N
+            (this.modPow(this.options.options.primeGroup.g, b, this.options.options.primeGroup.N) + verifier * k) %
+            this.options.options.primeGroup.N
         );
     }
 
@@ -141,7 +160,7 @@ export class Routines {
      * @param value
      */
     isValidPublicValue(value: bigint): boolean {
-        return value % this.parameters.primeGroup.N !== ZERO;
+        return value % this.options.options.primeGroup.N !== BigInt(0);
     }
 
     /**
@@ -202,11 +221,11 @@ export class Routines {
      * @param B The server's public key "B".
      */
     computeClientSessionKey(k: bigint, x: bigint, u: bigint, a: bigint, B: bigint): bigint {
-        const N = this.parameters.primeGroup.N;
+        const N = this.options.options.primeGroup.N;
         const exp = u * x + a;
-        const tmp = (modPow(this.parameters.primeGroup.g, x, N) * k) % N;
+        const tmp = (this.modPow(this.options.options.primeGroup.g, x, N) * k) % N;
 
-        return modPow(B + N - tmp, exp, N);
+        return this.modPow(B + N - tmp, exp, N);
     }
 
     /**
@@ -217,7 +236,7 @@ export class Routines {
      * @param b The server's private key "b".
      */
     computeServerSessionKey(verifier: bigint, u: bigint, A: bigint, b: bigint): bigint {
-        const N = this.parameters.primeGroup.N
-        return modPow(modPow(verifier, u, N) * A, b, N);
+        const N = this.options.options.primeGroup.N
+        return this.modPow(this.modPow(verifier, u, N) * A, b, N);
     }
 }
