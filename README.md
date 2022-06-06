@@ -4,7 +4,7 @@
 This is a TypeScript implementation of Secure Remote Password as documented at [RFC5054](https://datatracker.ietf.org/doc/html/rfc5054).
 
 The part of using steps was inspired by [tssrp6a](https://github.com/midonet/tssrp6a) which is another SRP implementation,
-but because it was asynchronous. Anyway, we thank you for that. 
+but it was asynchronous. Anyway, we thank you. 
 
 
 ## How to use?
