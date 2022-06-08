@@ -46,10 +46,7 @@ app.post('/login', function (req, res) {
         console.log("All good 1");
     }
     else if(step === "2") {
-        const server = new Server({
-            ...routines,
-            srvState: db
-        });
+        const server = new Server(routines, db);
         let M2 = server.step2(A, M1); // Verify client (if exception, then failed)
 
         res.status(200).send({M2});

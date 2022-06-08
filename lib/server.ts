@@ -12,16 +12,16 @@ export class Server {
     private declare b: bigint;
     private declare B: bigint;
 
-    constructor(options?: Partial<Options>) {
+    constructor(options?: Partial<Options>, state?: ServerState) {
         let opts: any = options || {};
         this.routines = (opts.routines || new Routines()).apply(opts);
 
-        if(opts.srvState) {
-            this.I = opts.srvState.identity;
-            this.salt = BigInt("0x" + opts.srvState.salt);
-            this.verifier = BigInt("0x" + opts.srvState.verifier);
-            this.b = BigInt("0x" + opts.srvState.b);
-            this.B = BigInt("0x" + opts.srvState.B);
+        if(state) {
+            this.I = state.identity;
+            this.salt = BigInt("0x" + state.salt);
+            this.verifier = BigInt("0x" + state.verifier);
+            this.b = BigInt("0x" + state.b);
+            this.B = BigInt("0x" + state.B);
         }
     }
 

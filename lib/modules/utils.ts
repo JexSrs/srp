@@ -1,7 +1,7 @@
 import {Routines} from "./routines";
 import {IVerifierAndSalt} from "../components/types";
 import {bigintToBytes, bytesToBigint,} from './transformations'
-import {HashFunction, VerifierOptions} from "../components/cryptoTypes";
+import {HashFunction} from "../components/cryptoTypes";
 import {Options} from "../components/options";
 
 const ZERO: bigint = BigInt(0);
@@ -112,32 +112,35 @@ export function modPow(x: bigint, pow: bigint, mod: bigint): bigint {
 /**
  * Generates a random verifier.
  * @param options
+ * @param identity
+ * @param salt
+ * @param password
  */
-export function createVerifier(options: Partial<Options> & {identity: string; salt: bigint; password: string;}): bigint {
-    if (!options.identity || !options.identity.trim()) throw new Error("Identity (I) must not be null or empty.")
-    if (!options.salt) throw new Error("Salt (s) must not be null.");
-    if (!options.password || !options.password.trim()) throw new Error("Password (P) must not be null  or empty.");
+export function createVerifier(options: Partial<Options>, identity: string, salt: bigint, password: string): bigint {
+    if (!identity || !identity.trim()) throw new Error("Identity (I) must not be null or empty.")
+    if (!salt) throw new Error("Salt (s) must not be null.");
+    if (!password || !password.trim()) throw new Error("Password (P) must not be null  or empty.");
 
     let routines = options.routines || new Routines();
     routines.apply(options);
 
-    const x = routines.computeX(options.identity, options.salt, options.password);
+    const x = routines.computeX(identity, salt, password);
     return routines.computeVerifier(x);
 }
 
 /**
  * Generates salt and verifier.
  * @param options
+ * @param identity
+ * @param password
+ * @param sBytes
  */
-export function generateVerifierAndSalt(options: VerifierOptions): IVerifierAndSalt {
+export function generateVerifierAndSalt(options: Partial<Options>, identity: string, password: string, sBytes?: number): IVerifierAndSalt {
     options.routines = (options.routines || new Routines()).apply(options);
-    const s = options.routines.generateRandomSalt(options.sBytes);
+    const s = options.routines.generateRandomSalt(sBytes);
     return {
         salt: s.toString(16),
-        verifier: createVerifier({
-            ...options,
-            salt: s
-        }).toString(16)
+        verifier: createVerifier(options, identity, s, password).toString(16)
     };
 }
 
