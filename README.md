@@ -1,7 +1,7 @@
 # Secure Remote Password
-**Secure Remote Password | Safe authentication without password exchange**
+**SRP | Safe authentication without password exchange**
 
-This library was inspired by [tssrp6a](https://github.com/midonet/tssrp6a) which is an SRP implementation.
+This is a TypeScript implementation of Secure Remote Password as documented at RFC5054.
 
 The part of using steps was inspired by [tssrp6a](https://github.com/midonet/tssrp6a) which is another SRP implementation,
 but it was asynchronous. Anyway, we thank you.
