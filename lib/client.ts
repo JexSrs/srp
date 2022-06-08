@@ -1,42 +1,32 @@
 import {Routines} from "./modules/routines";
-import {ClientState, IVerifierAndSalt, M1AndA, ServerState} from "./components/types";
+import {ClientState, M1AndA} from "./components/types";
 import {Options} from "./components/options";
-import {generateVerifierAndSalt} from "./modules/utils";
-import {VerifierOptions} from "./components/cryptoTypes";
 
 export class Client {
 
-    /**
-     * Generate user's credentials.
-     * @param options
-     */
-    static register(options: VerifierOptions): IVerifierAndSalt {
-        return generateVerifierAndSalt(options);
-    }
-
     private readonly routines: Routines;
 
-    constructor(options?: Partial<Options>) {
+    constructor(options?: Partial<Options>, state?: ClientState) {
         let opts: any = options || {};
 
         this.routines = (opts.routines || new Routines()).apply(opts);
 
-        if(opts.clientState) {
+        if(state) {
             // filled after step1
-            if (opts.clientState.identity)
-                this.I = opts.clientState.identity;
-            if (opts.clientState.IH)
-                this.IH = new Uint8Array(opts.clientState.IH);
+            if (state.identity)
+                this.I = state.identity;
+            if (state.IH)
+                this.IH = new Uint8Array(state.IH);
 
             // filled after step 2
-            if (opts.clientState.A)
-                this.A = BigInt("0x" + opts.clientState.A);
-            if (opts.clientState.a)
-                this.a = BigInt("0x" + opts.clientState.a);
-            if (opts.clientState.M1)
-                this.M1 = BigInt("0x" + opts.clientState.M1);
-            if (opts.clientState.S)
-                this.S = BigInt("0x" + opts.clientState.S);
+            if (state.A)
+                this.A = BigInt("0x" + state.A);
+            if (state.a)
+                this.a = BigInt("0x" + state.a);
+            if (state.M1)
+                this.M1 = BigInt("0x" + state.M1);
+            if (state.S)
+                this.S = BigInt("0x" + state.S);
         }
     }
 

@@ -45,10 +45,7 @@ app.post('/login', (req, res) => {
         console.log("All good 1");
     }
     else if(step === "2") {
-        const server = new Server({
-            ...routines,
-            srvState: db
-        });
+        const server = new Server(routines, db);
         let M2 = server.step2(A, M1); // Verify client (if exception, then failed)
 
         res.status(200).end(M2);
@@ -59,9 +56,9 @@ app.post('/login', (req, res) => {
 });
 
 
-// const server = app.listen(5000, function () {
-//     let host = server.address().address
-//     let port = server.address().port
-//
-//     console.log("Listening at https://%s:%s", host, port)
-// });
+const server = app.listen(5000, function () {
+    let host = server.address().address
+    let port = server.address().port
+
+    console.log("Listening at https://%s:%s", host, port)
+});

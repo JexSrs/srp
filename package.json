@@ -1,6 +1,6 @@
 {
-  "name": "@project-christopher/srp",
-  "version": "3.0.0",
+  "name": "srp",
+  "version": "1.0.0",
   "description": "",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -10,21 +10,21 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Project-Christopher/srp.git"
+    "url": "git+https://github.com/JexSrs/srp.git"
   },
   "bugs": {
-    "url": "https://github.com/Project-Christopher/srp/issues"
+    "url": "https://github.com/Project-Christopher/JexSrs/issues"
   },
   "license": "Apache 2.0",
   "dependencies": {
     "crypto-js": "^4.1.1"
   },
   "devDependencies": {
-    "@types/node": "^17.0.33",
+    "@types/node": "^17.0.41",
     "@types/crypto-js": "^4.1.1",
     "chai": "^4.3.6",
     "express": "4.18.1",
     "mocha": "^10.0.0",
-    "typescript": "^4.6.4"
+    "typescript": "^4.7.3"
   }
 }
